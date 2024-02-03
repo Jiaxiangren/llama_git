@@ -612,7 +612,8 @@ def train(args, train_dataloader, model, col_func):
                 with amp.scale_loss(loss, optimizer) as scaled_loss:
                     scaled_loss.backward()
             else:
-                loss.backward()      
+                loss.backward()
+            print("loss:", loss)      
 
             tr_loss += loss.item()
 
