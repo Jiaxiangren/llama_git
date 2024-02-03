@@ -1,0 +1,15 @@
+{
+    "train_data" : "./data/dart/train.jsonl",
+    "valid_data" : "./data/dart/valid.jsonl",
+    "train_batch_size": 8,
+    "valid_batch_size": 4,
+    "seq_len": 512,
+    "lr": 1e-4,
+    "weight_decay": 0.01,
+    "rounds": 20,
+    "num_clients": 100,
+    "m": 10,
+    "dirichlet_alpha":5,
+    "num_local_train_epochs":2,
+    "data_partition_method": "dirichlet_quantity"
+}

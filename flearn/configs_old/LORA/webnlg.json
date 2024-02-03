@@ -1,0 +1,16 @@
+{
+    "train_data" : "./data/webnlg/train.jsonl",
+    "valid_data" : "./data/webnlg/valid.jsonl",
+    "train_batch_size": 1,
+    "valid_batch_size": 1,
+    "seq_len": 512,
+    "learning_rate": 1e-4,
+    "weight_decay": 0.01,
+    "rounds": 20,
+    "num_clients": 100,
+    "m": 1,
+    "dirichlet_alpha":5,
+    "num_local_train_epochs":2,
+    "data_partition_method": "dirichlet_quantity",
+    "personalized": 0
+}

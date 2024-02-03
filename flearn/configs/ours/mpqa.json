@@ -1,0 +1,13 @@
+{
+    "task_name": "mpqa",
+    "learning_rate": 4e-4,
+    "train_batch_size": 8,
+    "eval_batch_size": 8,
+    "num_clients": 100,
+    "m": 10,
+    "dirichlet_alpha":5,
+    "num_local_train_epochs":2,
+    "rounds": 100,
+    "data_partition_method": "dirichlet_label",
+    "layer_peace_func": "linear"
+}

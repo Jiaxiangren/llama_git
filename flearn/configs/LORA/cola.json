@@ -1,0 +1,17 @@
+{
+    "task_name": "cola",
+    "learning_rate": 4e-4,
+    "train_batch_size": 8,
+    "eval_batch_size": 8,
+    "add_prompt_layer": 0,
+    "prompt_type": "lora",
+    "num_clients": 10,
+    "m": 5,
+    "dirichlet_alpha":1,
+    "num_local_train_epochs":1,
+    "rounds": 20,
+    "data_partition_method": "dirichlet_label",
+    "sort_type": "ours",
+    "server_cl": 1,
+    "client_cl": 0
+}
