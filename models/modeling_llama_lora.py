@@ -940,7 +940,8 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
         self.num_labels = config.num_labels
         self.model = LlamaModel(config)
         # self.score = nn.Linear(config.hidden_size, self.num_labels, bias=False)
-        self.score = LlaMaLMHead(config)
+        # self.score = LlaMaLMHead(config)
+        self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
 
         # Initialize weights and apply final processing
         self.post_init()
@@ -1019,7 +1020,7 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
             return_dict=return_dict,
         )
         hidden_states = transformer_outputs[0]
-        logits = self.score(hidden_states)
+        # logits = self.score(hidden_states)
 
         if input_ids is not None:
             batch_size = input_ids.shape[0]
@@ -1038,7 +1039,8 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
 
         # pooled_logits = logits[torch.arange(batch_size, device=logits.device), sequence_lengths]
 
-        pooled_logits = logits[torch.arange(batch_size), mask_pos]
+        pooled_states = hidden_states[torch.arange(batch_size), mask_pos]
+        pooled_logits = self.lm_head(pooled_states)
 
         loss = None
         if labels is not None:

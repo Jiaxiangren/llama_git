@@ -1,8 +1,8 @@
 {
     "task_name": "rte",
     "learning_rate": 4e-4,
-    "train_batch_size": 4,
-    "eval_batch_size": 4,
+    "train_batch_size": 1,
+    "eval_batch_size": 1,
     "num_clients": 100,
     "m": 10,
     "dirichlet_alpha":5,

@@ -43,7 +43,7 @@ class CentralTraining(object):
         self.args.data_dir = self.args.data_dir + self.args.task_name + '/'
         self.args.output_dir = self.args.output_dir + 'FL/' + self.args.task_name + '/'
 
-        # torch.set_default_tensor_type(torch.HalfTensor)
+        torch.set_default_tensor_type(torch.HalfTensor)
 
         # 设置随机种子
         self.reset_seed()
@@ -92,6 +92,8 @@ class CentralTraining(object):
             # exit()
             
             config.apply_lora=self.args.apply_lora
+            print(config.apply_lora)
+
             # config.apply_lora=False
             config.lora_alpha=self.args.lora_alpha
             config.lora_r=self.args.lora_r
@@ -106,7 +108,12 @@ class CentralTraining(object):
                         config=config, 
                     )
             self.model.resize_token_embeddings(len(self.tokenizer))
-            
+
+            weights = self.model.state_dict()
+            print(weights.keys())
+            # print(weights["layers.0.self_attn.q_proj.lora_A"])
+            # print(weights["model.layers.0.self_attn.q_proj.lora_B"])
+            exit()
     
     def generate_prompt(self):
         self.train_parameters_name = list()
@@ -166,9 +173,6 @@ class CentralTraining(object):
 
         # 加载模型
         self.load_model()
-
-        
-
 
         # load dataset and user groups
         self.init_data()
