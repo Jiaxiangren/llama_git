@@ -109,11 +109,11 @@ class CentralTraining(object):
                     )
             self.model.resize_token_embeddings(len(self.tokenizer))
 
-            weights = self.model.state_dict()
-            print(weights.keys())
+            # weights = self.model.state_dict()
+            # print(weights.keys())
             # print(weights["layers.0.self_attn.q_proj.lora_A"])
             # print(weights["model.layers.0.self_attn.q_proj.lora_B"])
-            exit()
+            # exit()
     
     def generate_prompt(self):
         self.train_parameters_name = list()
