@@ -629,7 +629,7 @@ def train(args, train_dataloader, model, col_func):
                 for name, p in model.named_parameters():
                     if p.requires_grad:
                         print(name, p.grad)
-                        exit()
+                exit()
                 optimizer.zero_grad()
                 global_step += 1
     
