@@ -933,7 +933,7 @@ class LlaMaLMHead(nn.Module):
         return x
 
 class LlamaForSequenceClassification(LlamaPreTrainedModel):
-    _keys_to_ignore_on_load_missing = [r"lm_head.weight"]
+    # _keys_to_ignore_on_load_missing = [r"lm_head.weight"]
 
     def __init__(self, config):
         super().__init__(config)
@@ -1033,7 +1033,7 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
             sequence_lengths = -1
         else:
             if input_ids is not None:
-                sequence_lengths = (torch.ne(input_ids, self.config.pad_token_id).sum(-1) - 1).to(logits.device)
+                sequence_lengths = (torch.ne(input_ids, self.config.pad_token_id).sum(-1) - 1).to(hidden_states.device)
             else:
                 sequence_lengths = -1
 
@@ -1044,7 +1044,7 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
 
         loss = None
         if labels is not None:
-            labels = labels.to(logits.device)
+            labels = labels.to(hidden_states.device)
             if self.config.problem_type is None:
                 if self.num_labels == 1:
                     self.config.problem_type = "regression"
@@ -1062,7 +1062,7 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
             elif self.config.problem_type == "single_label_classification":
                 loss_fct = CrossEntropyLoss()
                 # loss = loss_fct(pooled_logits.view(-1, self.num_labels), labels.view(-1))
-                loss = loss_fct(pooled_logits.view(-1, self.config.vocab_size), labels.view(-1))
+                loss = loss_fct(pooled_logits.view(-1, self.config.vocab_size - 2), labels.view(-1))
             elif self.config.problem_type == "multi_label_classification":
                 loss_fct = BCEWithLogitsLoss()
                 loss = loss_fct(pooled_logits, labels)
