@@ -613,7 +613,7 @@ def train(args, train_dataloader, model, col_func):
                     scaled_loss.backward()
             else:
                 loss.backward()
-            # print("loss:", loss)      
+            print("loss:", loss)      
 
             tr_loss += loss.item()
 
