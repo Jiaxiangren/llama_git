@@ -626,7 +626,11 @@ def train(args, train_dataloader, model, col_func):
 
                 optimizer.step()
                 # scheduler.step()  # Update learning rate schedule
-                model.zero_grad()
+                for name, p in model.named_parameters():
+                    if p.requires_grad:
+                        print(name, p.grad)
+                        exit()
+                optimizer.zero_grad()
                 global_step += 1
     
     # state_dict = {}
