@@ -110,10 +110,10 @@ class CentralTraining(object):
             self.model.resize_token_embeddings(len(self.tokenizer))
 
             weights = self.model.state_dict()
-            print(weights.keys())
-            print(weights["layers.0.self_attn.q_proj.lora_A"])
-            print(weights["model.layers.0.self_attn.q_proj.lora_B"])
-            exit()
+            # print(weights.keys())
+            # print(weights["model.layers.0.self_attn.q_proj.lora_A"])
+            # print(weights["model.layers.0.self_attn.q_proj.lora_B"])
+            # exit()
     
     def generate_prompt(self):
         self.train_parameters_name = list()
@@ -196,6 +196,13 @@ class CentralTraining(object):
 
 
         global_weights = self.model.get_copy_of_trainable_weights()
+
+        
+        # print(global_weights.keys())
+
+        # for name, p in self.model.named_parameters():
+        #     print(name)
+        # exit()
             
         self.reset_seed()
 
