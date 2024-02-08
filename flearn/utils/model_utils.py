@@ -619,7 +619,7 @@ def train(args, train_dataloader, model, col_func):
             inputs["mask_pos"] = batch[-2]
 
             print(fl_config.device)
-            exit()
+            # exit()
             with torch.autocast(device_type=fl_config.device, dtype=torch.float16):
                 outputs = model(**inputs)
             loss = outputs[0]
