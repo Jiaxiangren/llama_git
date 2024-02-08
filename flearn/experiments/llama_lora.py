@@ -105,9 +105,8 @@ class CentralTraining(object):
 
             self.model = LlamaForSequenceClassification.from_pretrained(
                         self.args.model_name_or_path,
-                        torch_dtype=torch.float32,
-                        config=config, 
-                    )
+                        config=config,
+                    ).float().to(self.args.device)
             self.model.resize_token_embeddings(len(self.tokenizer))
 
             weights = self.model.state_dict()
@@ -121,7 +120,7 @@ class CentralTraining(object):
             # print(weights.keys())
             print(weights["model.layers.0.self_attn.q_proj.lora_A"].dtype)
             # print(weights["model.layers.0.self_attn.q_proj.lora_B"])
-            # exit()
+            exit()
     
     def generate_prompt(self):
         self.train_parameters_name = list()
@@ -191,7 +190,7 @@ class CentralTraining(object):
         # exit()
 
         # evaluate difficulty for each sample for each clients
-        self.model = self.model.to(self.args.device)
+        # self.model = self.model.to(self.args.device)
 
 
         # Training
