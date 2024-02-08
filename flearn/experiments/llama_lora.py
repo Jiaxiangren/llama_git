@@ -118,9 +118,9 @@ class CentralTraining(object):
             # print(embedding_weights[32001])
             # exit()
             # print(weights.keys())
-            print(weights["model.layers.0.self_attn.q_proj.lora_A"].dtype)
-            # print(weights["model.layers.0.self_attn.q_proj.lora_B"])
-            # exit()
+            print(weights["model.layers.0.self_attn.q_proj.lora_A"])
+            print(weights["model.layers.0.self_attn.q_proj.lora_B"])
+            exit()
     
     def generate_prompt(self):
         self.train_parameters_name = list()
