@@ -645,15 +645,16 @@ def train(args, train_dataloader, model, col_func):
                     # torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
                     torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
 
-
-                optimizer.step()
+                total = 0
                 for name, p in model.named_parameters():
                     if p.requires_grad:
                         # print(name)
                         old_grad = torch.sum(abs(p.grad))
-                        
+                        total += torch.sum(abs(p.grad))
                         # print(name, sum(p.grad))
-                # print(total)
+                print(total)
+
+                optimizer.step()
                 optimizer.zero_grad()
                 global_step += 1
             
