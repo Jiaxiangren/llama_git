@@ -104,7 +104,8 @@ class CentralTraining(object):
             config.apply_bitfit = self.args.apply_bitfit
 
             self.model = LlamaForSequenceClassification.from_pretrained(
-                        self.args.model_name_or_path, 
+                        self.args.model_name_or_path,
+                        torch_dtype=torch.float16
                         config=config, 
                     )
             self.model.resize_token_embeddings(len(self.tokenizer))

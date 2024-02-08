@@ -654,7 +654,7 @@ def train(args, train_dataloader, model, col_func):
                         old_grad = torch.sum(abs(p.grad))
                         total += torch.sum(abs(p.grad))
                         # print(name, sum(p.grad))
-                print(total)
+                print("total gradient", total)
 
                 optimizer.step()
                 optimizer.zero_grad()
