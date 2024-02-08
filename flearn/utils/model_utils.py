@@ -618,7 +618,7 @@ def train(args, train_dataloader, model, col_func):
             inputs["token_type_ids"] = batch[2]
             inputs["mask_pos"] = batch[-2]
 
-            print("device:", fl_config.device)
+            # print("device:", fl_config.device)
             # exit()
             # with torch.autocast(device_type=fl_config.device, dtype=torch.float16):
             outputs = model(**inputs)
