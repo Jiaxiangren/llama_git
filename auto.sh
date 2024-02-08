@@ -9,4 +9,4 @@
 
 
 
-CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0 python Fed_lora.py --lr 1 --path ./flearn/configs/ours/rte.json
+CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0 python Fed_lora.py --lr 5e-5 --path ./flearn/configs/ours/rte.json
