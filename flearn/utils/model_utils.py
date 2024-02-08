@@ -613,8 +613,9 @@ def train(args, train_dataloader, model, col_func):
             }
             inputs["token_type_ids"] = batch[2]
             inputs["mask_pos"] = batch[-2]
-            outputs = model(**inputs)
-            loss = outputs[0]  # model outputs are always tuple in transformers (see doc)
+            with torch.autocast(device_type="cuda"):
+                outputs = model(**inputs)
+                loss = outputs[0]  # model outputs are always tuple in transformers (see doc)
 
             # if fl_config.gradient_accumulation_steps > 1:
             #     loss = loss / fl_config.gradient_accumulation_steps
@@ -622,11 +623,11 @@ def train(args, train_dataloader, model, col_func):
             if fl_config.gradient_accumulation_steps > 1:
                 loss = loss / fl_config.gradient_accumulation_steps
 
-            if fl_config.fp16:
-                with amp.scale_loss(loss, optimizer) as scaled_loss:
-                    scaled_loss.backward()
-            else:
-                loss.backward()
+            # if fl_config.fp16:
+            #     with amp.scale_loss(loss, optimizer) as scaled_loss:
+            #         scaled_loss.backward()
+            # else:
+            loss.backward()
             print("loss:", loss)      
 
             tr_loss += loss.item()
