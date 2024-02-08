@@ -620,13 +620,14 @@ def train(args, train_dataloader, model, col_func):
 
             print("device:", fl_config.device)
             # exit()
-            with torch.autocast(device_type=fl_config.device, dtype=torch.float16):
-                outputs = model(**inputs)
+            # with torch.autocast(device_type=fl_config.device, dtype=torch.float16):
+            outputs = model(**inputs)
             loss = outputs[0]
-            scaler.scale(loss).backward()
+            loss.backward()
+            # scaler.scale(loss).backward()
 
-            scaler.step(optimizer)
-            scaler.update()
+            # scaler.step(optimizer)
+            # scaler.update()
 
             # if fl_config.gradient_accumulation_steps > 1:
             #     loss = loss / fl_config.gradient_accumulation_steps
@@ -639,11 +640,11 @@ def train(args, train_dataloader, model, col_func):
             tr_loss += loss.item()
 
             
-            for name, p in model.named_parameters():
-                if p.requires_grad:
-                    print(name)
-                    old_copy = copy.deepcopy(p.data)
-                    break
+            # for name, p in model.named_parameters():
+            #     if p.requires_grad:
+            #         print(name)
+            #         old_copy = copy.deepcopy(p.data)
+            #         break
                         
                         # print(name, sum(p.grad))
             if (step + 1) % fl_config.gradient_accumulation_steps == 0:
@@ -662,20 +663,20 @@ def train(args, train_dataloader, model, col_func):
                         # print(name, sum(p.grad))
                 print("total grad:", total)
 
-                # optimizer.step()
+                optimizer.step()
                 optimizer.zero_grad()
                 global_step += 1
             
-            for name, p in model.named_parameters():
-                if p.requires_grad:
-                    print(name)
-                    new_copy = copy.deepcopy(p.data)
-                    break
-            print("old parameters", old_copy)
-            print("new parameters", new_copy)
-            diff = torch.sum(abs(old_copy - new_copy))
-            grad_sum = torch.sum(abs(old_grad))
-            print(diff, grad_sum)
+            # for name, p in model.named_parameters():
+            #     if p.requires_grad:
+            #         print(name)
+            #         new_copy = copy.deepcopy(p.data)
+            #         break
+            # print("old parameters", old_copy)
+            # print("new parameters", new_copy)
+            # diff = torch.sum(abs(old_copy - new_copy))
+            # grad_sum = torch.sum(abs(old_grad))
+            # print(diff, grad_sum)
 
             exit()
 
