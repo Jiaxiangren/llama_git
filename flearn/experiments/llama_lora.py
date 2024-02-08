@@ -120,7 +120,7 @@ class CentralTraining(object):
             # print(weights.keys())
             print(weights["model.layers.0.self_attn.q_proj.lora_A"].dtype)
             # print(weights["model.layers.0.self_attn.q_proj.lora_B"])
-            exit()
+            # exit()
     
     def generate_prompt(self):
         self.train_parameters_name = list()
