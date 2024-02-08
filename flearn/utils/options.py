@@ -27,7 +27,7 @@ class flArguments():
     evaluate_during_training: int = field(default=1, metadata={"help":"whether to evaulate during training"})
     max_steps: int = field(default=5000, metadata={"help":"max steps"})
     learning_rate: float = field(default=4e-4, metadata={"help":"the learning rate of training process"})
-    fp16: bool = field(default=False)
+    fp16: bool = field(default=True)
     fp16_opt_level: str = field(default="01")
     max_grad_norm: float = field(default=1.0)
     adam_epsilon: float = field(default=1e-8)

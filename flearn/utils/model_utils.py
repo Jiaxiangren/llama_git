@@ -20,6 +20,7 @@ import torch.nn.functional as F
 from flearn.utils.process_data import PromptDataset
 from data.process import processors
 import math
+from torch.cuda import amp
 
 logger = logging.getLogger(__name__)
 

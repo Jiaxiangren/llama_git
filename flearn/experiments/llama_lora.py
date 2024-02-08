@@ -43,7 +43,7 @@ class CentralTraining(object):
         self.args.data_dir = self.args.data_dir + self.args.task_name + '/'
         self.args.output_dir = self.args.output_dir + 'FL/' + self.args.task_name + '/'
 
-        torch.set_default_tensor_type(torch.HalfTensor)
+        # torch.set_default_tensor_type(torch.HalfTensor)
 
         # 设置随机种子
         self.reset_seed()
