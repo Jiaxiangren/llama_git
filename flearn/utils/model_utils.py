@@ -645,7 +645,7 @@ def train(args, train_dataloader, model, col_func):
                 #     torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), fl_config.max_grad_norm)
                 # else:
                 #     # torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
-                #     torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
 
                 total = 0
                 for name, p in model.named_parameters():
