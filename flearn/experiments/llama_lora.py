@@ -214,10 +214,10 @@ class CentralTraining(object):
             
         self.reset_seed()
 
-        test_loss, test_acc = evaluate((self.args, self.args, self.args), self.model, self.tokenizer)
+        # test_loss, test_acc = evaluate((self.args, self.args, self.args), self.model, self.tokenizer)
         
         # print(test_acc.keys())
-        print("-train loss:{:.4f} -test acc:{}".format(test_loss, test_acc))
+        # print("-train loss:{:.4f} -test acc:{}".format(test_loss, test_acc))
         lr = self.args.learning_rate
         for epoch in range(self.args.rounds):
             start = time.time()
