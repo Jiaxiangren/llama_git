@@ -522,6 +522,19 @@ def train(args, train_dataloader, model, col_func):
 
     # Prepare optimizer and schedule (linear warmup and decay)
     no_decay = ["bias", "LayerNorm.weight"]
+
+    # optimizer_grouped_parameters = [
+    #     {
+    #         "params": [n for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and p.requires_grad],
+    #         "weight_decay": fl_config.weight_decay,
+    #     },
+    #     {"params": [n for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and p.requires_grad], "weight_decay": 0.0},
+    # ]  
+    # print(optimizer_grouped_parameters)
+    # exit()
+
+    # optimizer_grouped_parameters = [{"params": torch.nn.parameter.Parameter(torch.tensor(1.), requires_grad=True)}]
+
     optimizer_grouped_parameters = [
         {
             "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and p.requires_grad],
@@ -617,22 +630,46 @@ def train(args, train_dataloader, model, col_func):
 
             tr_loss += loss.item()
 
+            
+            for name, p in model.named_parameters():
+                    if p.requires_grad:
+                        print(name)
+                        old_copy = copy.deepcopy(p.data)
+                        break
+                        
+                        # print(name, sum(p.grad))
             if (step + 1) % fl_config.gradient_accumulation_steps == 0:
                 if fl_config.fp16:
                     torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), fl_config.max_grad_norm)
                 else:
                     # torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
-                    torch.nn.utils.clip_grad_norm_(model.parameters(), 0)
+                    torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
 
 
                 optimizer.step()
-                # scheduler.step()  # Update learning rate schedule
                 for name, p in model.named_parameters():
                     if p.requires_grad:
-                        print(name, p.grad)
-                exit()
+                        # print(name)
+                        old_grad = torch.sum(abs(p.grad))
+                        
+                        # print(name, sum(p.grad))
+                # print(total)
                 optimizer.zero_grad()
                 global_step += 1
+            
+            for name, p in model.named_parameters():
+                    if p.requires_grad:
+                        print(name)
+                        new_copy = copy.deepcopy(p.data)
+                        break
+            print(old_copy)
+            print(new_copy)
+            diff = torch.sum(abs(old_copy - new_copy))
+            grad_sum = torch.sum(abs(old_grad))
+            print(diff, grad_sum)
+
+            exit()
+
     
     # state_dict = {}
     # for name, p in model.named_parameters():

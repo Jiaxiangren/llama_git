@@ -110,6 +110,11 @@ class CentralTraining(object):
             self.model.resize_token_embeddings(len(self.tokenizer))
 
             weights = self.model.state_dict()
+            embedding_weights = self.model.get_input_embeddings().weight
+            # print(embedding_weights.size())
+            # print(embedding_weights[32000])
+            # print(embedding_weights[32001])
+            # exit()
             # print(weights.keys())
             # print(weights["model.layers.0.self_attn.q_proj.lora_A"])
             # print(weights["model.layers.0.self_attn.q_proj.lora_B"])
@@ -130,6 +135,7 @@ class CentralTraining(object):
             if param.requires_grad == True:
                 all_param += param.numel()
         print('total param is {}'.format(all_param))
+
     
 
     def client_train(self, idxs_users, train_dataloaders, local_weights, global_weights, time_list):

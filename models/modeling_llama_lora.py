@@ -831,6 +831,12 @@ class LlamaForCausalLM(LlamaPreTrainedModel):
         hidden_states = outputs[0]
         logits = self.lm_head(hidden_states)
 
+        # sentence = "hi hello yes"
+        # label = "<s> 1 2 3"
+        # oyutput: hi hello yes <end>
+        # input:  <s> hi hell0 <mask>
+
+
         loss = None
         if labels is not None:
             # Shift so that tokens < n predict n
@@ -1038,6 +1044,10 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
                 sequence_lengths = -1
 
         # pooled_logits = logits[torch.arange(batch_size, device=logits.device), sequence_lengths]
+        
+        ## mask_pos = 4
+        ## hello hi i <mask>
+        ## <start> hello hi i
 
         pooled_states = hidden_states[torch.arange(batch_size), mask_pos]
         pooled_logits = self.lm_head(pooled_states)
