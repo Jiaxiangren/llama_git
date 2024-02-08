@@ -550,7 +550,11 @@ def train(args, train_dataloader, model, col_func):
     else:
         num_warmup_steps = fl_config.warmup_rate * t_total
 
-    optimizer = AdamW(optimizer_grouped_parameters, lr=fl_config.learning_rate, eps=fl_config.adam_epsilon, weight_decay=0)
+    # optimizer = AdamW(optimizer_grouped_parameters, lr=fl_config.learning_rate, eps=fl_config.adam_epsilon, weight_decay=0)
+
+    optimizer = AdamW(model.parameters(), lr=fl_config.learning_rate, weight_decay=fl_config.weight_decay)
+
+    scaler = torch.cuda.amp.GradScaler()
 
 
 
@@ -580,7 +584,7 @@ def train(args, train_dataloader, model, col_func):
 
 
     tr_loss, logging_loss, best = 0.0, 0.0, 0.0
-    model.zero_grad()
+    # model.zero_grad()
     train_iterator = trange(
         epochs_trained,
         int(fl_config.num_local_train_epochs),
@@ -613,20 +617,22 @@ def train(args, train_dataloader, model, col_func):
             }
             inputs["token_type_ids"] = batch[2]
             inputs["mask_pos"] = batch[-2]
-            outputs = model(**inputs)
-            loss = outputs[0]  # model outputs are always tuple in transformers (see doc)
+
+
+            with torch.autocast(device_type=fl_config.device, dtype=torch.float16):
+                outputs = model(**inputs)
+            loss = outputs[0]
+            scaler.scale(loss).backward()
+
+            scaler.step(optimizer)
+            scaler.update()
 
             # if fl_config.gradient_accumulation_steps > 1:
             #     loss = loss / fl_config.gradient_accumulation_steps
 
             # if fl_config.gradient_accumulation_steps > 1:
             #     loss = loss / fl_config.gradient_accumulation_steps
-
-            if fl_config.fp16:
-                with amp.scale_loss(loss, optimizer) as scaled_loss:
-                    scaled_loss.backward()
-            else:
-                loss.backward()
+            
             print("loss:", loss)      
 
             tr_loss += loss.item()
@@ -640,11 +646,11 @@ def train(args, train_dataloader, model, col_func):
                         
                         # print(name, sum(p.grad))
             if (step + 1) % fl_config.gradient_accumulation_steps == 0:
-                if fl_config.fp16:
-                    torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), fl_config.max_grad_norm)
-                else:
-                    # torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
-                    torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
+                # if fl_config.fp16:
+                #     torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), fl_config.max_grad_norm)
+                # else:
+                #     # torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
+                #     torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
 
                 total = 0
                 for name, p in model.named_parameters():
@@ -655,7 +661,7 @@ def train(args, train_dataloader, model, col_func):
                         # print(name, sum(p.grad))
                 print(total)
 
-                optimizer.step()
+                # optimizer.step()
                 optimizer.zero_grad()
                 global_step += 1
             
