@@ -641,11 +641,11 @@ def train(args, train_dataloader, model, col_func):
                         
                         # print(name, sum(p.grad))
             if (step + 1) % fl_config.gradient_accumulation_steps == 0:
-                if fl_config.fp16:
-                    torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), fl_config.max_grad_norm)
-                else:
-                    # torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
-                    torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
+                # if fl_config.fp16:
+                #     torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), fl_config.max_grad_norm)
+                # else:
+                #     # torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
+                #     torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
 
                 total = 0
                 for name, p in model.named_parameters():
