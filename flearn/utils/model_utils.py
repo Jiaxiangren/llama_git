@@ -613,39 +613,38 @@ def train(args, train_dataloader, model, col_func):
             }
             inputs["token_type_ids"] = batch[2]
             inputs["mask_pos"] = batch[-2]
-            with torch.autocast(device_type="cuda"):
-                outputs = model(**inputs)
-                loss = outputs[0]  # model outputs are always tuple in transformers (see doc)
+            outputs = model(**inputs)
+            loss = outputs[0]  # model outputs are always tuple in transformers (see doc)
 
             # if fl_config.gradient_accumulation_steps > 1:
             #     loss = loss / fl_config.gradient_accumulation_steps
 
-            if fl_config.gradient_accumulation_steps > 1:
-                loss = loss / fl_config.gradient_accumulation_steps
+            # if fl_config.gradient_accumulation_steps > 1:
+            #     loss = loss / fl_config.gradient_accumulation_steps
 
-            # if fl_config.fp16:
-            #     with amp.scale_loss(loss, optimizer) as scaled_loss:
-            #         scaled_loss.backward()
-            # else:
-            loss.backward()
+            if fl_config.fp16:
+                with amp.scale_loss(loss, optimizer) as scaled_loss:
+                    scaled_loss.backward()
+            else:
+                loss.backward()
             print("loss:", loss)      
 
             tr_loss += loss.item()
 
             
             for name, p in model.named_parameters():
-                    if p.requires_grad:
-                        print(name)
-                        old_copy = copy.deepcopy(p.data)
-                        break
+                if p.requires_grad:
+                    print(name)
+                    old_copy = copy.deepcopy(p.data)
+                    break
                         
                         # print(name, sum(p.grad))
             if (step + 1) % fl_config.gradient_accumulation_steps == 0:
-                # if fl_config.fp16:
-                #     torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), fl_config.max_grad_norm)
-                # else:
-                #     # torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
-                torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
+                if fl_config.fp16:
+                    torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), fl_config.max_grad_norm)
+                else:
+                    # torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
+                    torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
 
                 total = 0
                 for name, p in model.named_parameters():
@@ -654,17 +653,17 @@ def train(args, train_dataloader, model, col_func):
                         old_grad = torch.sum(abs(p.grad))
                         total += torch.sum(abs(p.grad))
                         # print(name, sum(p.grad))
-                print("total gradient", total)
+                print(total)
 
                 optimizer.step()
                 optimizer.zero_grad()
                 global_step += 1
             
             for name, p in model.named_parameters():
-                    if p.requires_grad:
-                        print(name)
-                        new_copy = copy.deepcopy(p.data)
-                        break
+                if p.requires_grad:
+                    print(name)
+                    new_copy = copy.deepcopy(p.data)
+                    break
             print(old_copy)
             print(new_copy)
             diff = torch.sum(abs(old_copy - new_copy))

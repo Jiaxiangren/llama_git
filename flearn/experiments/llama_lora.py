@@ -105,7 +105,7 @@ class CentralTraining(object):
 
             self.model = LlamaForSequenceClassification.from_pretrained(
                         self.args.model_name_or_path,
-                        torch_dtype=torch.float16,
+                        torch_dtype=torch.float32,
                         config=config, 
                     )
             self.model.resize_token_embeddings(len(self.tokenizer))
