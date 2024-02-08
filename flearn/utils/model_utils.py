@@ -660,7 +660,7 @@ def train(args, train_dataloader, model, col_func):
                         old_grad = torch.sum(abs(p.grad))
                         total += torch.sum(abs(p.grad))
                         # print(name, sum(p.grad))
-                print(total)
+                print("total grad:", total)
 
                 # optimizer.step()
                 optimizer.zero_grad()
@@ -671,8 +671,8 @@ def train(args, train_dataloader, model, col_func):
                     print(name)
                     new_copy = copy.deepcopy(p.data)
                     break
-            print(old_copy)
-            print(new_copy)
+            print("old parameters", old_copy)
+            print("new parameters", new_copy)
             diff = torch.sum(abs(old_copy - new_copy))
             grad_sum = torch.sum(abs(old_grad))
             print(diff, grad_sum)
