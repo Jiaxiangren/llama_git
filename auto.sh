@@ -16,7 +16,9 @@
 
 # CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0 python Fed_lpt.py --lr 5e-5 --path ./flearn/configs/LPT/rte.json
 
-CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0 python Fed_v2.py --lr 5e-5 --path ./flearn/configs/V2/rte.json
+# CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0 python Fed_v2.py --lr 5e-5 --path ./flearn/configs/V2/rte.json
+
+CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0 python Fed_adapter.py --lr 5e-5 --path ./flearn/configs/ADAPTER/rte.json
 
 # for dataset in qnli sst-2 cola mrpc rte boolq mpqa subj trec mr
 # do
