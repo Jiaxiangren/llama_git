@@ -1171,8 +1171,8 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
         super().__init__(config)
         self.num_labels = config.num_labels
         self.model = LlamaModel(config)
-        # self.score = nn.Linear(config.hidden_size, self.num_labels, bias=False)
-        self.score = LlaMaLMHead(config)
+        # self.score = LlaMaLMHead(config)
+        self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
 
         # Initialize weights and apply final processing
         self.post_init()
@@ -1282,11 +1282,8 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
             else:
                 sequence_lengths = -1
 
-        # pooled_logits = logits[torch.arange(batch_size, device=logits.device), sequence_lengths]
-
-        pooled_logits = hidden_states[torch.arange(batch_size), mask_pos]
-
-        pooled_logits = self.score(pooled_logits)
+        pooled_states = hidden_states[torch.arange(batch_size), mask_pos]
+        pooled_logits = self.lm_head(pooled_states)
 
         # print(pooled_logits.size())
         # exit()
@@ -1311,8 +1308,7 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
                     # loss = loss_fct(pooled_logits.view(-1, self.config.vocab_size), labels.view(-1))
             elif self.config.problem_type == "single_label_classification":
                 loss_fct = CrossEntropyLoss()
-                # loss = loss_fct(pooled_logits.view(-1, self.num_labels), labels.view(-1))
-                loss = loss_fct(pooled_logits.view(-1, self.config.vocab_size), labels.view(-1))
+                loss = loss_fct(pooled_logits.view(-1, self.config.vocab_size - 2), labels.view(-1))
             elif self.config.problem_type == "multi_label_classification":
                 loss_fct = BCEWithLogitsLoss()
                 loss = loss_fct(pooled_logits, labels)
