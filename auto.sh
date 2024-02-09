@@ -9,4 +9,25 @@
 
 
 
-CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0 python Fed_lora.py --lr 5e-5 --path ./flearn/configs/ours/rte.json
+
+
+
+# CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0 python Fed_lora.py --lr 5e-5 --path ./flearn/configs/ours/rte.json
+
+CUDA_LAUNCH_BLOCKING=1 CUDA_VISIBLE_DEVICES=0 python Fed_lpt.py --lr 5e-5 --path ./flearn/configs/ours/rte.json
+
+# for dataset in qnli sst-2 cola mrpc rte boolq mpqa subj trec mr
+# do
+#     CUDA_VISIBLE_DEVICES=7 python Fed_model_ours.py --lr 1e-4 --select_method ours --select_layer_num 24 --sort_type fedalt --path ./flearn/configs/ours/${dataset}.json | tee ./res/exp/fedalt/${dataset}.txt
+# done
+
+# for dataset in qnli sst-2 cola mrpc rte boolq mpqa subj trec mr
+# do
+#     CUDA_VISIBLE_DEVICES=7 python Fed_model_ours.py --lr 1e-4 --select_method ours --select_layer_num 24 --sort_type fedalt --path ./flearn/configs/ours/${dataset}.json | tee ./res/exp/fedalt/${dataset}.txt
+# done
+
+# for dataset in qnli sst-2 cola mrpc rte boolq mpqa subj trec mr
+# do
+#     CUDA_VISIBLE_DEVICES=7 python Fed_model_ours.py --lr 1e-4 --select_method ours --select_layer_num 24 --sort_type fedalt --path ./flearn/configs/ours/${dataset}.json | tee ./res/exp/fedalt/${dataset}.txt
+# done
+

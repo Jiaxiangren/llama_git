@@ -89,9 +89,7 @@ class CentralTraining(object):
 
             self.tokenizer.add_special_tokens({'mask_token': '<mask>'})
             print(self.tokenizer.mask_token_id)
-            # exit()
             
-            # config.apply_lora=self.args.apply_lora
             config.num_prompt_tokens = self.args.num_prompt_tokens
             config.add_prompt_layer = self.args.add_prompt_layer
 

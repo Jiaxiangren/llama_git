@@ -1043,11 +1043,6 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
             else:
                 sequence_lengths = -1
 
-        # pooled_logits = logits[torch.arange(batch_size, device=logits.device), sequence_lengths]
-        
-        ## mask_pos = 4
-        ## hello hi i <mask>
-        ## <start> hello hi i
 
         pooled_states = hidden_states[torch.arange(batch_size), mask_pos]
         pooled_logits = self.lm_head(pooled_states)
