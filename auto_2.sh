@@ -1,6 +1,6 @@
 
 source ~/miniconda3/etc/profile.d/conda.sh
-conda activate roberta
+conda activate lora
 
 
 # attempt
