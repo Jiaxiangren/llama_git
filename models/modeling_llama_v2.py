@@ -1067,8 +1067,7 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
         )
         hidden_states = outputs[0]
 
-        pooled_states = hidden_states[torch.arange(batch_size), mask_pos]
-        pooled_logits = self.lm_head(pooled_states)
+        
         
 
         if input_ids is not None:
@@ -1089,9 +1088,8 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
 
         # mask_pos = mask_pos + self.config.num_prompt_tokens
         # print(logits.size(), mask_pos)
-        pooled_logits = hidden_states[torch.arange(batch_size), mask_pos]
-
-        pooled_logits = self.score(pooled_logits)
+        pooled_states = hidden_states[torch.arange(batch_size), mask_pos]
+        pooled_logits = self.lm_head(pooled_states)
 
         loss = None
         if labels is not None:
