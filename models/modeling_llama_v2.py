@@ -934,7 +934,8 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
         self.model = LlamaModel(config)
         # self.score = nn.Linear(config.hidden_size, self.num_labels, bias=False)
         self.num_prompt_tokens = config.num_prompt_tokens
-        self.score = LlaMaLMHead(config)
+        # self.score = LlaMaLMHead(config)
+        self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
 
         self.dropout = torch.nn.Dropout(0.1)
         self.prompt_embedding = None
@@ -1065,6 +1066,9 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
             prompt_attention_mask = prompt_attention_mask,
         )
         hidden_states = outputs[0]
+
+        pooled_states = hidden_states[torch.arange(batch_size), mask_pos]
+        pooled_logits = self.lm_head(pooled_states)
         
 
         if input_ids is not None:
@@ -1109,7 +1113,7 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
             elif self.config.problem_type == "single_label_classification":
                 loss_fct = CrossEntropyLoss()
                 # loss = loss_fct(pooled_logits.view(-1, self.num_labels), labels.view(-1))
-                loss = loss_fct(pooled_logits.view(-1, self.config.vocab_size), labels.view(-1))
+                loss = loss_fct(pooled_logits.view(-1, self.config.vocab_size - 2), labels.view(-1))
             elif self.config.problem_type == "multi_label_classification":
                 loss_fct = BCEWithLogitsLoss()
                 loss = loss_fct(pooled_logits, labels)
