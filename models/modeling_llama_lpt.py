@@ -1021,8 +1021,8 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
         self.prompt_embedding = nn.Embedding(self.config.num_prompt_tokens, self.config.hidden_size)
         indices = np.random.permutation(range(32002))[:self.config.num_prompt_tokens]
         init_weight = self.model.embed_tokens.weight[indices]
-        # self.prompt_embedding._load_from_state_dict({"weight": init_weight}, "", None, True, [], [], "")
-        self.prompt_embedding._load_from_state_dict({"weight": init_weight})
+        self.prompt_embedding._load_from_state_dict({"weight": init_weight}, "", None, True, [], [], "")
+        # self.prompt_embedding._load_from_state_dict({"weight": init_weight})
 
 
     def get_input_embeddings(self):
