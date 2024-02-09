@@ -554,7 +554,7 @@ def train(args, train_dataloader, model, col_func):
 
     optimizer = AdamW(model.parameters(), lr=fl_config.learning_rate, weight_decay=fl_config.weight_decay)
 
-    scaler = torch.cuda.amp.GradScaler()
+    # scaler = torch.cuda.amp.GradScaler()
 
 
 
@@ -618,24 +618,12 @@ def train(args, train_dataloader, model, col_func):
             inputs["token_type_ids"] = batch[2]
             inputs["mask_pos"] = batch[-2]
 
-            # print("device:", fl_config.device)
-            # exit()
-            # with torch.autocast(device_type=fl_config.device, dtype=torch.float16):
             outputs = model(**inputs)
             loss = outputs[0]
             loss.backward()
-            # scaler.scale(loss).backward()
 
-            # scaler.step(optimizer)
-            # scaler.update()
-
-            # if fl_config.gradient_accumulation_steps > 1:
-            #     loss = loss / fl_config.gradient_accumulation_steps
-
-            # if fl_config.gradient_accumulation_steps > 1:
-            #     loss = loss / fl_config.gradient_accumulation_steps
             
-            print("loss:", loss)      
+            # print("loss:", loss)      
 
             tr_loss += loss.item()
 
@@ -648,43 +636,14 @@ def train(args, train_dataloader, model, col_func):
                         
                         # print(name, sum(p.grad))
             if (step + 1) % fl_config.gradient_accumulation_steps == 0:
-                # if fl_config.fp16:
-                #     torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), fl_config.max_grad_norm)
-                # else:
-                #     # torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
-                #     torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
-
-                # total = 0
-                # for name, p in model.named_parameters():
-                #     if p.requires_grad:
-                #         # print(name)
-                #         old_grad = torch.sum(abs(p.grad))
-                #         total += torch.sum(abs(p.grad))
-                #         # print(name, sum(p.grad))
-                # print("total grad:", total)
+                if fl_config.fp16:
+                    torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), fl_config.max_grad_norm)
+                else:
+                    torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
 
                 optimizer.step()
                 optimizer.zero_grad()
                 global_step += 1
-            
-            # for name, p in model.named_parameters():
-            #     if p.requires_grad:
-            #         print(name)
-            #         new_copy = copy.deepcopy(p.data)
-            #         break
-            # print("old parameters", old_copy)
-            # print("new parameters", new_copy)
-            # diff = torch.sum(abs(old_copy - new_copy))
-            # grad_sum = torch.sum(abs(old_grad))
-            # print(diff, grad_sum)
-
-            # exit()
-
-    
-    # state_dict = {}
-    # for name, p in model.named_parameters():
-    #     if p.requires_grad == True:
-    #         state_dict[name] = copy.deepcopy(p.data)
 
     return copy.deepcopy(model.get_copy_of_trainable_weights()), tr_loss / global_step, _
 
