@@ -1,20 +1,14 @@
 {
     "task_name": "mr",
-    "learning_rate": 1e-3,
+    "learning_rate": 1e-4,
     "train_batch_size": 8,
     "eval_batch_size": 8,
-    "add_prompt_layer": 13,
-    "prompt_type": "lpt",
+    "add_prompt_layer": 0,
+    "prompt_type": "v2",
     "num_clients": 100,
     "m": 10,
     "dirichlet_alpha":5,
     "num_local_train_epochs":2,
     "rounds": 100,
-    "data_partition_method": "dirichlet_label",
-    "local_optimizer": "Adamw",
-    "server_optimizer": "sgd",
-    "server_lr":1e-2,
-    "batch_grad": 0,
-    "mode": "generator_pt",
-    "generator_type": "NPG"
+    "data_partition_method": "dirichlet_label"
 }
