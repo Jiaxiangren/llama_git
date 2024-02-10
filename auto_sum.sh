@@ -3,7 +3,7 @@
 
 
 #lora
-for lr in 1e-5 5e-5 1e-4 4e-4 1e-3
+for lr in 1e-6 5e-6 1e-5  2e-5 5e-5
 do
     for dataset in rte
     do

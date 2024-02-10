@@ -180,7 +180,7 @@ class LlamaAttention(nn.Module):
                 f" and `num_heads`: {self.num_heads})."
             )
         if config.apply_lora:
-            self.q_proj = lora.Linear(self.hidden_size, self.num_heads * self.head_dim, config.lora_r, lora_alpha=config.lora_alpha)
+            self.q_proj = lora.Linear(self.hidden_size, self.num_heads * self.head_dim, config.lora_r, lora_alpha=config.lora_alpha,lora_dropout=config.lora_dropout)
         else:
             self.q_proj = nn.Linear(self.hidden_size, self.num_heads * self.head_dim, bias=False)
 

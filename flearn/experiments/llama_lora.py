@@ -97,6 +97,7 @@ class CentralTraining(object):
             # config.apply_lora=False
             config.lora_alpha=self.args.lora_alpha
             config.lora_r=self.args.lora_r
+            config.lora_dropout=self.args.lora_dropout
             config.apply_adapter = self.args.apply_adapter
             config.adapter_path = self.args.adapter_path
             config.adapter_type = self.args.adapter_type
