@@ -3,7 +3,7 @@
 
 
 #lora
-for lr in 4e-4
+for lr in 1e-4
 do
     for dataset in rte
     do
