@@ -59,7 +59,7 @@ class flArguments():
     apply_lora: Optional[bool] = field(default=True, metadata={"help": "Whether to apply LoRA or not."},)
     lora_alpha: int = field(default=32, metadata={"help": "LoRA alpha"},)
     lora_r: int = field(default=16, metadata={"help": "LoRA r"},)
-    lora_dropout = field(default=0.05, metadata={"help": "LoRA dropout"},)
+    lora_dropout: float = field(default=0.05, metadata={"help": "LoRA dropout"},)
     lora_path: Optional[str] = field(default=None,metadata={"help": "The file path of LoRA parameters."},)
     apply_adapter: Optional[bool] = field(default=False,metadata={"help": "Whether to apply adapter or not."},)
     adapter_path: Optional[str] = field(default=None,metadata={"help": "The file path of adapter parameters."},)
