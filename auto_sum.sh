@@ -12,7 +12,7 @@
 # done
 
 
-python Fed_lora_seq.py --lr 1e-4 --path ./flearn/configs/LORA/${dataset}.json
+python Fed_lora_seq.py --lr 1e-4 --path ./flearn/configs/LORA/rte.json
 
 
 # lpt
