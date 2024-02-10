@@ -101,7 +101,7 @@ class Linear(nn.Linear, LoRALayer):
         merge_weights: bool = True,
         **kwargs
     ):
-        nn.Linear.__init__(self, in_features, out_features, **kwargs)
+        nn.Linear.__init__(self, in_features, out_features, **kwargs, bias=False)
         LoRALayer.__init__(self, r=r, lora_alpha=lora_alpha, lora_dropout=lora_dropout,
                            merge_weights=merge_weights)
 

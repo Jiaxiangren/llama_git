@@ -11,6 +11,7 @@
 #     done
 # done
 
+# python Fed_lora.py --lr 1e-4 --path ./flearn/configs/LORA/rte.json
 
 python Fed_lora_seq.py --lr 1e-4 --path ./flearn/configs/LORA/rte.json
 
