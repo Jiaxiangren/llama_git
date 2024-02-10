@@ -46,7 +46,7 @@ class flArguments():
     log_dir: str = field(default="./log/", metadata={"help":"the directory of log dir"})
     task_name: str = field(default='rte', metadata={"help":"the task name"})
     # model_name_or_path: str = field(default="roberta-large", metadata={"help": "the model name used for training"})
-    model_name_or_path: str = field(default="openlm-research/open_llama_3b", metadata={"help": "the model name used for training"})
+    model_name_or_path: str = field(default="openlm-research/open_llama_7b", metadata={"help": "the model name used for training"})
     # model_name_or_path: str = field(default="openlm-research/open_llama_7b", metadata={"help": "the model name used for training"})
     max_seq_length: int = field(default=512, metadata={"help":"max sequence length"})
     cache_dir: str = field(default=None, metadata={"help":"the directory of cache dir"})
