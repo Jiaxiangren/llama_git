@@ -3,17 +3,17 @@
 
 
 #lora
-# for lr in 1e-6 5e-6 1e-5  2e-5 5e-5
-# do
-#     for dataset in rte
-#     do
-#         python Fed_lora.py --lr ${lr} --path ./flearn/configs/LORA/${dataset}.json | tee ./res/lora/${dataset}_${lr}.txt
-#     done
-# done
+for lr in 5e-5 1e-4
+do
+    for dataset in rte
+    do
+        python Fed_lora.py --lr ${lr} --path ./flearn/configs/LORA/${dataset}.json | tee ./res/lora/${dataset}_${lr}.txt
+    done
+done
 
 # python Fed_lora.py --lr 1e-4 --path ./flearn/configs/LORA/rte.json
 
-python Fed_lora_seq.py --lr 1e-4 --path ./flearn/configs/LORA/rte.json
+# python Fed_lora_seq.py --lr 1e-4 --path ./flearn/configs/LORA/rte.json
 
 
 # lpt
