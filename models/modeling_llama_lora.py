@@ -1044,7 +1044,7 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
                 sequence_lengths = -1
 
 
-        pooled_states = hidden_states[torch.arange(batch_size), mask_pos]
+        pooled_states = hidden_states[torch.arange(batch_size), mask_pos-1]
         pooled_logits = self.lm_head(pooled_states)
 
         loss = None
