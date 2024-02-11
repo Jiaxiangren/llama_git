@@ -59,7 +59,6 @@ def main():
 
     if hyper_params.lr:
         training_args.learning_rate = float(hyper_params.lr)
-        training_args.transfer_learning_rate = 0.5 * training_args.learning_rate
     
     if hyper_params.momentum:
         training_args.momentum = float(hyper_params.momentum)

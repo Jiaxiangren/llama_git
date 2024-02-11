@@ -4,7 +4,8 @@ import numpy as np
 import random
 from tqdm import tqdm
 from flearn.utils.model_utils_ours import evaluate_mask_layer, evaluate_personalized, average_weights, train, train_others, train_personalize_with_our_mask, train_se, train_plgu, train_fedalt
-from flearn.utils.process_data_ours import PromptDataset, partition, partition_for_score
+from flearn.utils.process_data_ours import partition, partition_for_score
+from flearn.utils.process_data import PromptDataset
 from data.process import tasks_num_labels
 from transformers import LlamaConfig, LlamaTokenizer
 from models.modeling_llama_lora import LlamaForSequenceClassification
@@ -50,10 +51,10 @@ class CentralTraining(object):
         self.args.output_dir = self.args.output_dir + 'FL/' + self.args.task_name + '/'
 
         if self.args.select_method == "random":
-            self.layer_index_list = list(range(26))
+            self.layer_index_list = list(range(25))
             random.shuffle(self.layer_index_list)
         elif self.args.select_method == "increase":
-            self.layer_index_list = list(range(26))
+            self.layer_index_list = list(range(25))
 
 
         # 设置随机种子
@@ -142,12 +143,6 @@ class CentralTraining(object):
                         torch_dtype=torch.float16,
                     ).to(self.args.device)
             self.model.resize_token_embeddings(len(self.tokenizer))
-
-            for name, param in self.model.named_parameters():
-                if 'lora' in name:
-                    print(name)
-                else:
-                    param.requires_grad = False
     
     def generate_prompt(self, transfer_layer_index_list):
         self.train_parameters_name = list()
@@ -383,7 +378,7 @@ class CentralTraining(object):
 
 
         # evaluate difficulty for each sample batch for each clients
-        self.model = self.model.to(self.args.device)
+        # self.model = self.model.to(self.args.device)
         if self.args.sort_type == "ours":
             self.data_evaluate_and_score_ours()
         elif self.args.sort_type == "voc":

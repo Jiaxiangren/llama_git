@@ -613,7 +613,8 @@ def train(args, train_dataloader, model, col_func):
                     scaled_loss.backward()
             else:
                 loss.backward()      
-
+            
+            print(loss)
             tr_loss += loss.item()
 
             if (step + 1) % fl_config.gradient_accumulation_steps == 0:
@@ -2019,6 +2020,7 @@ def evaluate_mask(args, train_dataloader, model):
             inputs["token_type_ids"] = batch[2]
             inputs["mask_pos"] = batch[-2]
             outputs = model(**inputs)
+            # print(batch[0])
             loss = outputs[0]  # model outputs are always tuple in transformers (see doc)
 
 
@@ -2031,6 +2033,7 @@ def evaluate_mask(args, train_dataloader, model):
             else:
                 loss.backward()      
 
+            # print(loss)
             tr_loss += loss.item()
 
             if (step + 1) % fl_config.gradient_accumulation_steps == 0:
@@ -2611,10 +2614,10 @@ def train_others(args, train_dataset, model, col_func, ser_epoch):
     no_decay = ["bias", "LayerNorm.weight"]
     optimizer_grouped_parameters = [
         {
-            "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
+            "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and p.requires_grad],
             "weight_decay": fl_config.weight_decay,
         },
-        {"params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], "weight_decay": 0.0},
+        {"params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and p.requires_grad], "weight_decay": 0.0},
     ]
 
     
@@ -2696,7 +2699,7 @@ def train_others(args, train_dataset, model, col_func, ser_epoch):
             inputs["mask_pos"] = batch[-2]
             outputs = model(**inputs)
             loss = outputs[0]  # model outputs are always tuple in transformers (see doc)
-
+            print(batch[0])
             if fl_config.gradient_accumulation_steps > 1:
                 loss = loss / fl_config.gradient_accumulation_steps
 
@@ -2705,7 +2708,7 @@ def train_others(args, train_dataset, model, col_func, ser_epoch):
                     scaled_loss.backward()
             else:
                 loss.backward()    
-
+            print(loss)
             tr_loss += loss.item()
 
             if (step + 1) % fl_config.gradient_accumulation_steps == 0:
@@ -2716,11 +2719,11 @@ def train_others(args, train_dataset, model, col_func, ser_epoch):
 
 
                 optimizer.step()
-                scheduler.step()  # Update learning rate schedule
+                # scheduler.step()  # Update learning rate schedule
                 model.zero_grad()
                 global_step += 1
         
-    
+    print("loss:", tr_loss / global_step)
     state_dict = {}
     for name, p in model.named_parameters():
         if p.requires_grad == True:
