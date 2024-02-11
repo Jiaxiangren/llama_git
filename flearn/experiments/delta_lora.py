@@ -223,7 +223,7 @@ class CentralTraining(object):
         # print(test_acc.keys())
         print("-train loss:{:.4f} -test acc:{}".format(test_loss, test_acc))
         lr = self.args.learning_rate
-        thredshould_epoch = int(math.ceil(0.4*self.args.rounds))
+        thredshould_epoch = int(math.ceil(0.01*self.args.rounds))
         print("thredshold:", thredshould_epoch)
         global_lora = self.model.get_copy_of_trainable_weights()
         for epoch in range(self.args.rounds):
