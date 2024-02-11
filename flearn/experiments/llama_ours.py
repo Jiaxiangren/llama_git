@@ -383,7 +383,7 @@ class CentralTraining(object):
             self.data_evaluate_and_score_ours()
         elif self.args.sort_type == "voc":
             self.data_evaluate_and_score_voc()
-            _, self.test_loaders, _ = partition(self.args, self.train_dataset, \
+            _, self.test_loaders = partition(self.args, self.train_dataset, \
                     self.eval_dataset)
         elif self.args.sort_type == "seqreo":
             self.data_evaluate_and_score_seqreo()

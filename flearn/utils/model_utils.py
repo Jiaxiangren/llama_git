@@ -524,25 +524,6 @@ def train(args, train_dataloader, model, col_func):
     # Prepare optimizer and schedule (linear warmup and decay)
     no_decay = ["bias", "LayerNorm.weight"]
 
-    # optimizer_grouped_parameters = [
-    #     {
-    #         "params": [n for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and p.requires_grad],
-    #         "weight_decay": fl_config.weight_decay,
-    #     },
-    #     {"params": [n for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and p.requires_grad], "weight_decay": 0.0},
-    # ]  
-    # print(optimizer_grouped_parameters)
-    # exit()
-
-    # optimizer_grouped_parameters = [{"params": torch.nn.parameter.Parameter(torch.tensor(1.), requires_grad=True)}]
-
-    optimizer_grouped_parameters = [
-        {
-            "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and p.requires_grad],
-            "weight_decay": fl_config.weight_decay,
-        },
-        {"params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and p.requires_grad], "weight_decay": 0.0},
-    ]  
 
     
     if fl_config.warmup_steps > 0:

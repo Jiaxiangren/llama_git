@@ -1,8 +1,8 @@
 {
     "task_name": "trec",
     "learning_rate": 1e-4,
-    "train_batch_size": 16,
-    "eval_batch_size": 16,
+    "train_batch_size": 8,
+    "eval_batch_size": 8,
     "add_prompt_layer": 13,
     "prompt_type": "lpt",
     "num_clients": 100,

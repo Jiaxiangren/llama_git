@@ -2595,18 +2595,8 @@ def train_others(args, train_dataset, model, col_func, ser_epoch):
     t_total = len(train_dataloader) // fl_config.gradient_accumulation_steps * fl_config.num_local_train_epochs
 
 
-    # Prepare optimizer and schedule (linear warmup and decay)
-    no_decay = ["bias", "LayerNorm.weight"]
-    optimizer_grouped_parameters = [
-        {
-            "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and p.requires_grad],
-            "weight_decay": fl_config.weight_decay,
-        },
-        {"params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and p.requires_grad], "weight_decay": 0.0},
-    ]
-
     
-    optimizer = AdamW(optimizer_grouped_parameters, lr=fl_config.learning_rate, eps=fl_config.adam_epsilon, weight_decay=0)
+    optimizer = AdamW(model.parameters(), lr=fl_config.learning_rate, weight_decay=fl_config.weight_decay)
 
     if fl_config.warmup_steps > 0:
         num_warmup_steps = fl_config.warmup_steps
@@ -2684,15 +2674,7 @@ def train_others(args, train_dataset, model, col_func, ser_epoch):
             inputs["mask_pos"] = batch[-2]
             outputs = model(**inputs)
             loss = outputs[0]  # model outputs are always tuple in transformers (see doc)
-            print(batch[0])
-            if fl_config.gradient_accumulation_steps > 1:
-                loss = loss / fl_config.gradient_accumulation_steps
-
-            if fl_config.fp16:
-                with amp.scale_loss(loss, optimizer) as scaled_loss:
-                    scaled_loss.backward()
-            else:
-                loss.backward()    
+            loss.backward()    
             print(loss)
             tr_loss += loss.item()
 
@@ -2704,8 +2686,7 @@ def train_others(args, train_dataset, model, col_func, ser_epoch):
 
 
                 optimizer.step()
-                # scheduler.step()  # Update learning rate schedule
-                model.zero_grad()
+                optimizer.zero_grad()
                 global_step += 1
         
     print("loss:", tr_loss / global_step)
@@ -2715,9 +2696,7 @@ def train_others(args, train_dataset, model, col_func, ser_epoch):
             # print(name)
             state_dict[name] = copy.deepcopy(p.data)
     
-    local_steps = fl_config.num_local_train_epochs * len(epoch_iterator)
-    
-    return state_dict, tr_loss / global_step, local_steps
+    return copy.deepcopy(model.get_copy_of_trainable_weights()), tr_loss / global_step, _
 
 
 def predict(args, model, tokenizer):
