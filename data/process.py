@@ -272,7 +272,7 @@ class MrpcProcessor(DataProcessor):
             guid = f"{set_type}-{i}"
             text_a = line[3]
             text_b = line[4]
-            text_a = '{} ? <mask> , {}'.format(text_a, text_b)
+            text_a = '{} ? {} These two sentences are <mask> .'.format(text_a, text_b)
             label = None if set_type == "test" else label_map[line[0]]
             examples.append(InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
         return examples
@@ -335,7 +335,7 @@ class BoolqProcessor(DataProcessor):
             guid = f"{set_type}-{i}"
             text_a = line[3]
             text_b = line[4]
-            text_a = '{} ? <mask> , {}'.format(text_a, text_b)
+            text_a = '{} ? {} These two sentences are <mask> .'.format(text_a, text_b)
             label = None if set_type == "test" else label_map[line[0]]
             examples.append(InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
         return examples
@@ -691,7 +691,7 @@ class RteProcessor(DataProcessor):
             guid = f"{set_type}-{line[0]}"
             text_a = line[1]
             text_b = line[2]
-            text_a = '{} ? {} These two sentences are <mask>.'.format(text_a, text_b)
+            text_a = '{} ? {} These two sentences are <mask> .'.format(text_a, text_b)
             label = None if set_type == "test" else label_map[line[-1]]
             examples.append(InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
         return examples
@@ -1019,7 +1019,7 @@ class TrecProcessor(DataProcessor):
         for (i, line) in enumerate(lines):
             guid = f"{set_type}-{i}"
             text_a = line[text_index]
-            text_a = '<mask> : {}'.format(text_a)
+            text_a = '{} : <mask> .'.format(text_a)
             label = None if set_type == "test" else label_map[line[0]]
             examples.append(InputExample(guid=guid, text_a=text_a, text_b=None, label=label))
 

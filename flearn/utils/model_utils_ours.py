@@ -2689,12 +2689,7 @@ def train_others(args, train_dataset, model, col_func, ser_epoch):
                 optimizer.zero_grad()
                 global_step += 1
         
-    print("loss:", tr_loss / global_step)
-    state_dict = {}
-    for name, p in model.named_parameters():
-        if p.requires_grad == True:
-            # print(name)
-            state_dict[name] = copy.deepcopy(p.data)
+    print("training loss:", tr_loss / global_step)
     
     return copy.deepcopy(model.get_copy_of_trainable_weights()), tr_loss / global_step, _
 
