@@ -7,7 +7,6 @@ import os
 import random
 from re import L
 import sys
-import fitlog
 import pickle
 
 import numpy as np
