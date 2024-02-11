@@ -51,10 +51,10 @@ class CentralTraining(object):
         self.args.output_dir = self.args.output_dir + 'FL/' + self.args.task_name + '/'
 
         if self.args.select_method == "random":
-            self.layer_index_list = list(range(25))
+            self.layer_index_list = list(range(32))
             random.shuffle(self.layer_index_list)
         elif self.args.select_method == "increase":
-            self.layer_index_list = list(range(25))
+            self.layer_index_list = list(range(32))
 
 
         # 设置随机种子
