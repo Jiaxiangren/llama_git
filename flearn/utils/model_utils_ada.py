@@ -511,7 +511,7 @@ def evaluate_personalized_verify(args, model, test_loaders, tokenizer, client_we
     # print(acc_list)
 
 
-def train(args, train_dataloader, model, col_func):
+def pre_train(args, train_dataloader, model, col_func):
 
     model_config, fl_config = args[0], args[1]
 
