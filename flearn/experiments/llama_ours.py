@@ -240,7 +240,7 @@ class CentralTraining(object):
         data = []
         self.sorted_train_dataset = []
         self.client_score_dict = {}
-        file_name = './sorted_dataset/fl/{}/{}_dataset_{}_fisher_{}.pkl'.format(self.args.task_name, \
+        file_name = './sorted_dataset/fl/{}/{}_dataset_{}_{}.pkl'.format(self.args.task_name, \
                         self.args.sort_type, self.args.num_clients, self.args.dirichlet_alpha)
         if os.path.exists(file_name):
             with open(file_name, 'rb') as file:
