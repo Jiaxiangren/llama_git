@@ -1,5 +1,5 @@
-source ~/miniconda3/etc/profile.d/conda.sh
-conda activate lora
+# source ~/miniconda3/etc/profile.d/conda.sh
+# conda activate lora
 
 
 #lora
@@ -25,8 +25,9 @@ done
 for dataset in rte cola mrpc mpqa subj trec mr
 do
     CUDA_VISIBLE_DEVICES=0 python Fed_llama_ours.py --lr 7e-6 --select_method increase --select_layer_num 25 --sort_type voc --path ./flearn/configs/ours/${dataset}.json | tee ./res/voc/${dataset}.txt &
-    CUDA_VISIBLE_DEVICES=1 python Fed_llama_ours.py --lr 7e-6 --select_method increase --select_layer_num 25 --sort_type seqreo --path ./flearn/configs/ours/${dataset}.json | tee ./res/seqreo/${dataset}.txt &
-    CUDA_VISIBLE_DEVICES=2 python Fed_llama_ours.py --lr 7e-6 --select_method increase --select_layer_num 25 --sort_type shortformer --path ./flearn/configs/ours/${dataset}.json | tee ./res/shortformer/${dataset}.txt
+    CUDA_VISIBLE_DEVICES=1 python Fed_llama_ours.py --lr 7e-6 --select_method increase --select_layer_num 25 --sort_type seqreo --path ./flearn/configs/ours/${dataset}.json | tee ./res/slw/${dataset}.txt &
+    CUDA_VISIBLE_DEVICES=2 python Fed_llama_ours.py --lr 7e-6 --select_method increase --select_layer_num 25 --sort_type shortformer --path ./flearn/configs/ours/${dataset}.json | tee ./res/shortformer/${dataset}.txt &
+    CUDA_VISIBLE_DEVICES=3 python Fed_llama_ours.py --lr 7e-6 --select_method increase --select_layer_num 32 --sort_type se --path ./flearn/configs/ours/${dataset}.json | tee ./res/se/${dataset}.txt
     wait
 done
 
