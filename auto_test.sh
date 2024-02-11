@@ -14,7 +14,10 @@
 # CUDA_VISIBLE_DEVICES=0 python Fed_llama_ours.py --lr 1e-4 --select_method increase --select_layer_num 25 --sort_type seqreo --path ./flearn/configs/ours/rte.json
 
 #SHORTFORMER
-CUDA_VISIBLE_DEVICES=0 python Fed_llama_ours.py --lr 7e-6 --select_method increase --select_layer_num 25 --sort_type shortformer --path ./flearn/configs/ours/rte.json
+# CUDA_VISIBLE_DEVICES=0 python Fed_llama_ours.py --lr 7e-6 --select_method increase --select_layer_num 25 --sort_type shortformer --path ./flearn/configs/ours/rte.json
 
 #vanila
-CUDA_VISIBLE_DEVICES=0 python Fed_llama_ours.py --lr 7e-6 --select_method increase --select_layer_num 32 --sort_type vanila --path ./flearn/configs/ours/rte.json
+# CUDA_VISIBLE_DEVICES=0 python Fed_llama_ours.py --lr 7e-6 --select_method increase --select_layer_num 32 --sort_type vanila --path ./flearn/configs/ours/rte.json
+
+#se
+CUDA_VISIBLE_DEVICES=0 python Fed_llama_ours.py --lr 7e-6 --select_method increase --select_layer_num 32 --sort_type se --path ./flearn/configs/ours/rte.json
