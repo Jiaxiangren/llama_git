@@ -88,7 +88,7 @@ class flArguments():
     server_peace_func: str = field(default='linear', metadata={"help": "the peace func for server CL"})
     server_cl: int = field(default=1, metadata={"help":"if we use the server CL"})
     client_cl: int = field(default=1, metadata={"help": "whether to use client cl"})
-    personalization: int = field(default=0, metadata={"help": "whether to use client cl"})
+    personalization: int = field(default=0, metadata={"help": "personalization"})
     layer_peace_func: str = field(default="linear", metadata={"help":"whether to use the layer peace function"})
     momentum: float = field(default=0.5, metadata={"help":"whether to use the layer peace function"})
     prune_ratio: float = field(default=0.2, metadata={"help":"whether to use the layer peace function"})
