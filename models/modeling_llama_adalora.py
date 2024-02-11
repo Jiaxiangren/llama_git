@@ -180,14 +180,14 @@ class LlamaAttention(nn.Module):
                 f" and `num_heads`: {self.num_heads})."
             )
         if config.apply_lora:
-            self.q_proj = lora.SVDLinear(config.hidden_size, self.all_head_size, config.lora_r, lora_alpha=config.lora_alpha)
+            self.q_proj = lora.SVDLinear(config.hidden_size, self.num_heads * self.head_dim, config.lora_r, lora_alpha=config.lora_alpha)
         else:
             self.q_proj = nn.Linear(self.hidden_size, self.num_heads * self.head_dim, bias=False)
 
         self.k_proj = nn.Linear(self.hidden_size, self.num_heads * self.head_dim, bias=False)
 
         if config.apply_lora:
-            self.v_proj = lora.SVDLinear(config.hidden_size, self.all_head_size, config.lora_r, lora_alpha=config.lora_alpha)
+            self.v_proj = lora.SVDLinear(config.hidden_size, self.num_heads * self.head_dim, config.lora_r, lora_alpha=config.lora_alpha)
         else:
             self.v_proj = nn.Linear(self.hidden_size, self.num_heads * self.head_dim, bias=False)
         self.o_proj = nn.Linear(self.num_heads * self.head_dim, self.hidden_size, bias=False)
