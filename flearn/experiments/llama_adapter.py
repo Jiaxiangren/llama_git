@@ -63,7 +63,7 @@ class CentralTraining(object):
         self.args.local_rank = self.args.local_rank
         self.train_dataset = PromptDataset(self.args, self.args.task_name.lower(), self.tokenizer, data_type="train")
         self.eval_dataset = PromptDataset(self.args, self.args.task_name.lower(), self.tokenizer, data_type='dev')
-        self.train_loaders = partition(self.args, self.train_dataset, \
+        self.train_loaders, _ = partition(self.args, self.train_dataset, \
             self.eval_dataset)
 
 
