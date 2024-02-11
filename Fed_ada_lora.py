@@ -1,4 +1,4 @@
-from flearn.experiments.slora import *
+from flearn.experiments.ada_lora import *
 from flearn.utils.options import flArguments
 from transformers import HfArgumentParser
 import sys

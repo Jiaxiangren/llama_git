@@ -1,16 +1,21 @@
+from difflib import diff_bytes
 from http import client
+from inspect import Parameter
 import torch
 import numpy as np
 import random
 from tqdm import tqdm
-from flearn.utils.model_utils import evaluate, average_weights, train
+from flearn.utils.model_utils_ada import evaluate, average_weights, train, pre_train
 from flearn.utils.process_data import PromptDataset, partition
 from data.process import tasks_num_labels
 from transformers import LlamaConfig, LlamaTokenizer
-from models.modeling_llama_lora_seq import LlamaForSequenceClassification
+from models.modeling_llama_lora import LlamaForSequenceClassification
+from ..utils.fl_score_functions import *
 import copy
 import os
 import time
+import math
+import pickle
 
 
 
@@ -37,13 +42,16 @@ class CentralTraining(object):
         # self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         self.args = args
+        self.general_layer_num = self.args.select_layer_num
+
+
         self.v = {}
 
         self.args.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.args.data_dir = self.args.data_dir + self.args.task_name + '/'
         self.args.output_dir = self.args.output_dir + 'FL/' + self.args.task_name + '/'
 
-        # torch.set_default_tensor_type(torch.float16)
+        self.layer_index_list = list(range(24))
 
         # 设置随机种子
         self.reset_seed()
@@ -81,7 +89,7 @@ class CentralTraining(object):
             self.tokenizer = LlamaTokenizer.from_pretrained(
                         self.args.model_name_or_path,
                         do_lower_case=self.args.do_lower_case,
-                        cache_dir=self.args.cache_dir if self.args.cache_dir else None
+                        cache_dir=self.args.cache_dir if self.args.cache_dir else None,        
                     )
             
             self.tokenizer.add_special_tokens({'pad_token': '[PAD]'})
@@ -110,26 +118,10 @@ class CentralTraining(object):
                         torch_dtype=torch.float16,
                     ).to(self.args.device)
             self.model.resize_token_embeddings(len(self.tokenizer))
-
-            weights = self.model.state_dict()
-            embedding_weights = self.model.get_input_embeddings().weight
-
-            
-            # print(embedding_weights.size())
-            # print(embedding_weights[32000])
-            # print(embedding_weights[32001])
-            # exit()
-            # print(weights.keys())
-            print(weights["model.layers.0.self_attn.q_proj.lora_A"])
-            print(weights["model.layers.0.self_attn.q_proj.lora_B"])
-            exit()
     
     def generate_prompt(self):
-        self.train_parameters_name = list()
         for name, param in self.model.named_parameters():
-            # if 'attention.self.value' in name or 'attention.self.query' in name:
             if 'lora' in name:
-                self.train_parameters_name.append(name)
                 param.requires_grad = True
             else:
                 param.requires_grad = False
@@ -140,9 +132,23 @@ class CentralTraining(object):
                 all_param += param.numel()
         print('total param is {}'.format(all_param))
 
+
+    def generate_fine_tune(self):
+        for name, param in self.model.named_parameters():
+            if 'self_attn.q_proj.weight' in name or "self_attn.v_proj.weight" in name:
+                print(name)
+                param.requires_grad = True
+            else:
+                param.requires_grad = False
+
+        all_param = 0
+        for name, param in self.model.named_parameters():
+            if param.requires_grad == True:
+                all_param += param.numel()
+        print('total param is {}'.format(all_param))
     
 
-    def client_train(self, idxs_users, train_dataloaders, local_weights, global_weights, time_list):
+    def client_train(self, idxs_users, train_dataloaders, local_weights, time_list, global_lora):
         """
         进行客户端训练
         :param local_v:
@@ -166,13 +172,47 @@ class CentralTraining(object):
         for idx in idxs_users:
 
             self.model.train()
-            self.model.update_transfer_weights_from_dict(copy.deepcopy(global_weights))
+            self.model.update_trainable_weights_from_dict(copy.deepcopy(global_lora))
+
             start = time.time()
+
             w, loss, _ = train((self.args, self.args), train_dataloaders[idx], self.model, self.train_dataset.collate_fn)
-            
             local_weights.append([len(train_dataloaders[idx]), copy.deepcopy(w)])
             delta_time = time.time() - start
             time_list.append(delta_time)
+            total_loss += loss * len(train_dataloaders[idx])
+            print("{}:{:.4f}".format(idx, loss), end=" ")
+        return total_loss / num_current
+
+
+    def client_pre_train(self, idxs_users, train_dataloaders, local_weights, global_weights):
+        """
+        进行客户端训练
+        :param local_v:
+        :param local_P:
+        :param idxs_users:
+        :param global_model:
+        :param user_groups:
+        :param epoch:
+        :param train_dataset:
+        :param train_losses:
+        :param local_weights:
+        :param local_losses:
+        :return:
+        """
+        num_current = 0
+        print(len(train_dataloaders))
+        for idx in idxs_users:
+            num_current += len(train_dataloaders[idx])
+        total_loss = 0
+
+        for idx in idxs_users:
+
+            self.model.train()
+            self.model.update_trainable_weights_from_dict(global_weights)
+
+            w, loss, _ = pre_train((self.args, self.args), train_dataloaders[idx], self.model, self.train_dataset.collate_fn)
+            local_weights.append([len(train_dataloaders[idx]), copy.deepcopy(w)])
             total_loss += loss * len(train_dataloaders[idx])
             print("{}:{:.4f}".format(idx, loss), end=" ")
         return total_loss / num_current
@@ -184,16 +224,76 @@ class CentralTraining(object):
         # 加载模型
         self.load_model()
 
+
         # load dataset and user groups
         self.init_data()
-        self.generate_prompt()
-        
-        print(self.train_parameters_name)
-        # exit()
+
 
         # evaluate difficulty for each sample for each clients
-        # self.model = self.model.to(self.args.device)
+        self.model = self.model.to(self.args.device)
 
+        ############# stage_1, fine-tune the full parameters #############
+        num_of_trainable_params = self.generate_fine_tune()
+
+        initial_weights = self.model.get_copy_of_trainable_weights()
+        global_weights = copy.deepcopy(initial_weights)
+
+        for epoch in range(5):
+            start = time.time()
+            local_weights, time_list = [], []
+            print(f'\n | Global Training Round : {epoch} |\n')
+
+
+            # 选择设备，并进行训练
+            idxs_users = np.random.choice(range(self.args.num_clients), self.args.m, replace=False)
+            # idxs_users = np.random.choice(range(10), self.args.m, replace=False)
+                
+            training_loss = self.client_pre_train(idxs_users, self.train_loaders, local_weights, global_weights)
+
+
+            global_weights = average_weights(local_weights)
+
+            self.model.train()
+            self.model.update_trainable_weights_from_dict(copy.deepcopy(global_weights))
+
+            test_loss, test_acc = evaluate((self.args, self.args, self.args), self.model, self.tokenizer)
+            
+            
+
+
+            print("pre_training: epoch{:4d} - loss: {:.4f} - accuracy: {:.4f} - lr: {:.4f}".format(epoch, test_loss, test_acc, \
+                self.args.learning_rate))
+        
+        # calculate the diff
+        diff_weights = {}
+        for key in global_weights:
+            diff_weights[key] = global_weights[key] - initial_weights[key]
+        
+        # decompose the weights
+        global_lora = {}
+        for layer_name, params in diff_weights.items():
+            U, S, V = torch.svd(params)
+            k = 8
+            U_k = U[:, :k]
+            S_k_sqrt = torch.diag(torch.sqrt(S[:k]))
+            V_k = V[:, :k].T  # Note that torch.svd returns V, not V^T
+
+            PartA = (U_k @ S_k_sqrt).transpose(0,1)
+            PartB = (S_k_sqrt @ V_k).transpose(0,1)
+
+            # print(PartA.size())
+            # print(PartB.size())
+            # exit()
+            
+            layer_name_A = layer_name.replace('weight', 'lora_A')
+            layer_name_B = layer_name.replace('weight', 'lora_B')
+            global_lora[layer_name_A] = PartA
+            global_lora[layer_name_B] = PartB
+
+        self.generate_prompt()
+
+
+        ############# stage_2, train lora ###############
 
         # Training
         train_losses = []
@@ -204,18 +304,9 @@ class CentralTraining(object):
         params_list = []
         training_parameters = []
 
-
-        global_weights = self.model.get_copy_of_trainable_weights()
-
-        
-        # print(global_weights.keys())
-
-        # for name, p in self.model.named_parameters():
-        #     print(name)
-        # exit()
             
-        self.reset_seed()
 
+        self.reset_seed()
         test_loss, test_acc = evaluate((self.args, self.args, self.args), self.model, self.tokenizer)
         
         # print(test_acc.keys())
@@ -223,27 +314,31 @@ class CentralTraining(object):
         lr = self.args.learning_rate
         for epoch in range(self.args.rounds):
             start = time.time()
-            local_weights, time_list = [], []
+            local_weights, local_losses, local_v, local_P, time_list = [], [], [], [], []
             print(f'\n | Global Training Round : {epoch} |\n')
 
 
             # 选择设备，并进行训练
             idxs_users = np.random.choice(range(self.args.num_clients), self.args.m, replace=False)
-
+            # idxs_users = np.random.choice(range(10), self.args.m, replace=False)
+                
             training_loss = self.client_train(idxs_users, self.train_loaders, \
-            local_weights, global_weights, time_list)
+            local_weights, time_list, global_lora)
 
 
-            global_weights = average_weights(local_weights)
+            global_lora = average_weights(local_weights)
             self.model.train()
-            self.model.update_trainable_weights_from_dict(copy.deepcopy(global_weights))
+            self.model.update_trainable_weights_from_dict(copy.deepcopy(global_lora))
+            # print(global_weights)
 
-            test_loss, test_acc = evaluate((self.args, self.args, self.args), self.model,self.tokenizer)
-
+            test_loss, test_acc = evaluate((self.args, self.args, self.args), self.model, self.tokenizer)
+            
             test_accs.append(test_acc)
             max_times.append(max(time_list))
             train_losses.append(test_loss)
             training_losses.append(training_loss)
+            training_parameters.append(self.general_layer_num)
+            # params_list.append(num_of_trainable_params)
             if test_acc > best_acc:
                 best_acc = test_acc
             
@@ -259,3 +354,10 @@ class CentralTraining(object):
     
         res_dict = {"acc":test_accs, "eval_loss": train_losses, "best_acc": best_acc, "training_time":max_times, "training_loss":training_losses, "num_transfer_params":params_list}
         print(res_dict)
+        # with open(save_path + '/metrics_{}'.format(self.prompt_config.prompt_type), 'wb') as f:
+        #     pickle.dump(res_dict,f)
+
+
+# if __name__ == "__main__":
+#     t = CentralTraining(args, share_percent=10, iid=0, unequal=False, prune_interval=30, prune_rate=0.6, auto_rate=True, auto_mu=False, server_mu=0, client_mu=0)
+#     t.train()

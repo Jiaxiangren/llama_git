@@ -5,12 +5,11 @@ import torch
 import numpy as np
 import random
 from tqdm import tqdm
-from flearn.utils.model_utils import evaluate, average_weights, train_delta_lora, train_ada_lora
+from flearn.utils.model_utils_ada import evaluate, average_weights, train_delta_lora, train_ada_lora
 from flearn.utils.process_data import PromptDataset, partition
 from data.process import tasks_num_labels
-from transformers import RobertaConfig, RobertaTokenizer, AutoConfig
-from models.modeling_roberta_adalora import RobertaForMaskedLM
-from ..utils.fl_score_fuctions import *
+from transformers import LlamaConfig, LlamaTokenizer
+from models.modeling_llama_adalora import LlamaForSequenceClassification
 import copy
 import os
 import time
@@ -44,7 +43,6 @@ class CentralTraining(object):
         self.args = args
         self.general_layer_num = self.args.select_layer_num
 
-        self.logger = logging.getLogger(__name__)
 
         self.v = {}
 
@@ -77,8 +75,8 @@ class CentralTraining(object):
 
     def load_model(self):
 
-        if "roberta" in self.args.model_name_or_path:
-            config = RobertaConfig.from_pretrained(        
+        if "llama" in self.args.model_name_or_path:
+            config = LlamaConfig.from_pretrained(        
                         self.args.model_name_or_path,
                         num_labels=tasks_num_labels[self.args.task_name],
                         finetuning_task=self.args.task_name,
@@ -86,30 +84,39 @@ class CentralTraining(object):
                         output_hidden_states=True,
                         output_attentions=True
                     )
-            
                 
-            self.tokenizer = RobertaTokenizer.from_pretrained(
+            self.tokenizer = LlamaTokenizer.from_pretrained(
                         self.args.model_name_or_path,
                         do_lower_case=self.args.do_lower_case,
                         cache_dir=self.args.cache_dir if self.args.cache_dir else None,        
                     )
+            
+            self.tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+            print(self.tokenizer.pad_token_id)
 
-                
+            self.tokenizer.add_special_tokens({'mask_token': '<mask>'})
+            print(self.tokenizer.mask_token_id)
+            # exit()
+            
             config.apply_lora=self.args.apply_lora
+            print(config.apply_lora)
+
+            # config.apply_lora=False
             config.lora_alpha=self.args.lora_alpha
             config.lora_r=self.args.lora_r
+            config.lora_dropout=self.args.lora_dropout
             config.apply_adapter = self.args.apply_adapter
             config.adapter_path = self.args.adapter_path
             config.adapter_type = self.args.adapter_type
             config.adapter_size = self.args.adapter_size
             config.apply_bitfit = self.args.apply_bitfit
-            # config.prompt_layer_list = [9, 22, 18, 11, 16, 17, 21, 15, 10, 8, 12, 7]
 
-            
-            self.model = RobertaForMaskedLM.from_pretrained(
-                        self.args.model_name_or_path, 
-                        config=config, 
-                    )
+            self.model = LlamaForSequenceClassification.from_pretrained(
+                        self.args.model_name_or_path,
+                        config=config,
+                        torch_dtype=torch.float16,
+                    ).to(self.args.device)
+            self.model.resize_token_embeddings(len(self.tokenizer))
     
     def generate_prompt(self):
         self.trainable_parameter_list = []
@@ -140,21 +147,7 @@ class CentralTraining(object):
             if param.requires_grad == True:
                 all_param += param.numel()
         print('total param is {}'.format(all_param))
-        
-
-
-    # def generate_fine_tune(self):
-    #     for name, param in self.model.named_parameters():
-    #         if 'attention.self.query.weight' in name or 'attention.self.value.weight' in name:
-    #             param.requires_grad = True
-    #         else:
-    #             param.requires_grad = False
-
-    #     all_param = 0
-    #     for name, param in self.model.named_parameters():
-    #         if param.requires_grad == True:
-    #             all_param += param.numel()
-    #     print('total param is {}'.format(all_param))
+    
     
 
     def client_train(self, idxs_users, train_dataloaders, local_weights, time_list, global_lora, trainable_parameter_list):
