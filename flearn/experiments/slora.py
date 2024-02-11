@@ -51,7 +51,7 @@ class CentralTraining(object):
         self.args.data_dir = self.args.data_dir + self.args.task_name + '/'
         self.args.output_dir = self.args.output_dir + 'FL/' + self.args.task_name + '/'
 
-        self.layer_index_list = list(range(24))
+        self.layer_index_list = list(range(25))
 
         # 设置随机种子
         self.reset_seed()
