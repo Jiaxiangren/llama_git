@@ -7,6 +7,10 @@ sys.path.append('../')
 import torch
 from torch.utils.data import Dataset
 
+from data.process import convert_examples_to_features
+from data.process import output_modes
+from data.process import processors
+
 import numpy as np
 from scipy.stats import dirichlet
 from torch.utils.data import DataLoader, RandomSampler, random_split, Subset, SequentialSampler
