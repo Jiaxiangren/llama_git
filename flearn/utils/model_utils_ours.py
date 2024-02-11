@@ -522,13 +522,7 @@ def train(args, train_dataloader, model, col_func):
 
     # Prepare optimizer and schedule (linear warmup and decay)
     no_decay = ["bias", "LayerNorm.weight"]
-    optimizer_grouped_parameters = [
-        {
-            "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
-            "weight_decay": fl_config.weight_decay,
-        },
-        {"params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], "weight_decay": 0.0},
-    ]  
+
 
     
     if fl_config.warmup_steps > 0:
@@ -536,7 +530,11 @@ def train(args, train_dataloader, model, col_func):
     else:
         num_warmup_steps = fl_config.warmup_rate * t_total
 
-    optimizer = AdamW(optimizer_grouped_parameters, lr=fl_config.learning_rate, eps=fl_config.adam_epsilon, weight_decay=0)
+    # optimizer = AdamW(optimizer_grouped_parameters, lr=fl_config.learning_rate, eps=fl_config.adam_epsilon, weight_decay=0)
+
+    optimizer = AdamW(model.parameters(), lr=fl_config.learning_rate, weight_decay=fl_config.weight_decay)
+
+    # scaler = torch.cuda.amp.GradScaler()
 
 
 
@@ -566,7 +564,7 @@ def train(args, train_dataloader, model, col_func):
 
 
     tr_loss, logging_loss, best = 0.0, 0.0, 0.0
-    model.zero_grad()
+    # model.zero_grad()
     train_iterator = trange(
         epochs_trained,
         int(fl_config.num_local_train_epochs),
@@ -599,40 +597,27 @@ def train(args, train_dataloader, model, col_func):
             }
             inputs["token_type_ids"] = batch[2]
             inputs["mask_pos"] = batch[-2]
+
             outputs = model(**inputs)
-            loss = outputs[0]  # model outputs are always tuple in transformers (see doc)
+            loss = outputs[0]
+            loss.backward()
 
-            # if fl_config.gradient_accumulation_steps > 1:
-            #     loss = loss / fl_config.gradient_accumulation_steps
-
-            if fl_config.gradient_accumulation_steps > 1:
-                loss = loss / fl_config.gradient_accumulation_steps
-
-            if fl_config.fp16:
-                with amp.scale_loss(loss, optimizer) as scaled_loss:
-                    scaled_loss.backward()
-            else:
-                loss.backward()      
             
-            print(loss)
+            print("loss:", loss)      
+
             tr_loss += loss.item()
 
+            
             if (step + 1) % fl_config.gradient_accumulation_steps == 0:
                 if fl_config.fp16:
                     torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), fl_config.max_grad_norm)
                 else:
                     torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
 
-
                 optimizer.step()
-                # scheduler.step()  # Update learning rate schedule
-                model.zero_grad()
+                optimizer.zero_grad()
                 global_step += 1
-    
-    # state_dict = {}
-    # for name, p in model.named_parameters():
-    #     if p.requires_grad == True:
-    #         state_dict[name] = copy.deepcopy(p.data)
+        print("training loss:", tr_loss / global_step)
 
     return copy.deepcopy(model.get_copy_of_trainable_weights()), tr_loss / global_step, _
 

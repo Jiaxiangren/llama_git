@@ -4,8 +4,8 @@ import numpy as np
 import random
 from tqdm import tqdm
 from flearn.utils.model_utils_ours import evaluate_mask_layer, evaluate_personalized, average_weights, train, train_others, train_personalize_with_our_mask, train_se, train_plgu, train_fedalt
-from flearn.utils.process_data_ours import partition, partition_for_score
-from flearn.utils.process_data import PromptDataset
+from flearn.utils.process_data_ours import partition_for_score
+from flearn.utils.process_data import PromptDataset, partition
 from data.process import tasks_num_labels
 from transformers import LlamaConfig, LlamaTokenizer
 from models.modeling_llama_lora import LlamaForSequenceClassification
