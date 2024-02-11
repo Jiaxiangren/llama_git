@@ -1100,7 +1100,7 @@ def train_se(args, train_dataloader, model, col_func):
                 optimizer.step()
                 optimizer.zero_grad()
                 global_step += 1
-
+        print("training loss:", tr_loss / global_step)
 
     return copy.deepcopy(model.get_copy_of_trainable_weights()), tr_loss / global_step, _
 
