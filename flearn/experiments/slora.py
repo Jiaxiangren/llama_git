@@ -238,7 +238,7 @@ class CentralTraining(object):
         initial_weights = self.model.get_copy_of_trainable_weights()
         global_weights = copy.deepcopy(initial_weights)
 
-        for epoch in range(5):
+        for epoch in range(1):
             start = time.time()
             local_weights, time_list = [], []
             print(f'\n | Global Training Round : {epoch} |\n')
