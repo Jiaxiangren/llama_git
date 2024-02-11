@@ -263,7 +263,7 @@ def partition(args, train_dataset, test_dataset=None, logger=None):
                 print(f"client {i}: label 0 : {l0} label 1 : {l1}")
             # n_sample_list[i] = l0 + l1
     
-    return train_dataloader_list
+    return train_dataloader_list, test_dataloader_list
 
 
 def partition_for_score(args, train_dataset, test_dataset=None, logger=None):

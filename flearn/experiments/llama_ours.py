@@ -77,7 +77,7 @@ class CentralTraining(object):
         if self.args.sort_type in ['ours', 'voc', 'seqreo', 'shortformer', 'loss']:
             self.train_datasets, self.test_loaders = partition_for_score(self.args, self.train_dataset, self.eval_dataset)
         elif self.args.sort_type in ['vanila', 'se', 'plgu', 'fedalt']:
-            self.train_loaders, self.test_loaders, self.n_sample_list = partition(self.args, self.train_dataset, \
+            self.train_loaders, self.test_loaders  = partition(self.args, self.train_dataset, \
                 self.eval_dataset)
     
     def calculate_layer_score(self):
