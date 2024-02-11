@@ -272,7 +272,7 @@ class CentralTraining(object):
         # decompose the weights
         global_lora = {}
         for layer_name, params in diff_weights.items():
-            U, S, V = torch.svd(params)
+            U, S, V = torch.svd(copy.deepcopy(params).to(torch.float32))
             k = 8
             U_k = U[:, :k]
             S_k_sqrt = torch.diag(torch.sqrt(S[:k]))
@@ -287,8 +287,8 @@ class CentralTraining(object):
             
             layer_name_A = layer_name.replace('weight', 'lora_A')
             layer_name_B = layer_name.replace('weight', 'lora_B')
-            global_lora[layer_name_A] = PartA
-            global_lora[layer_name_B] = PartB
+            global_lora[layer_name_A] = copy.deepcopy(PartA).to(torch.float16)
+            global_lora[layer_name_B] = copy.deepcopy(PartB).to(torch.float16)
 
         self.generate_prompt()
 
