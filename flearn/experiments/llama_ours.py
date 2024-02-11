@@ -244,6 +244,8 @@ class CentralTraining(object):
                 for index, ele in enumerate(data):
                     self.client_score_dict[index] = ele[1]
         else:
+            dir_name = './sorted_dataset/fl/{}/'.format(self.args.task_name)
+            os.makedirs(dir_name, exist_ok=True)
             for client_index, train_dataset in enumerate(self.train_datasets):
                 print("prepossing the dataset for client:{}".format(client_index))
                 sorted_dataset, client_score = evaluate_and_sort_seqreo(self.args, self.args, train_dataset, \
