@@ -136,11 +136,12 @@ class OursLinear(nn.Linear, LoRALayer):
                     self.weight.data -= T(self.lora_B @ self.lora_A) * self.scaling
                 self.merged = False
         else:
-            if self.merge_weights and not self.merged:
-                # Merge the weights and mark it
-                if self.r > 0:
-                    self.weight.data += T(self.lora_B @ self.lora_A) * self.scaling
-                self.merged = True       
+            if self.lora_B.device != torch.device('cpu'):
+                if self.merge_weights and not self.merged:
+                    # Merge the weights and mark it
+                    if self.r > 0:
+                        self.weight.data += T(self.lora_B @ self.lora_A) * self.scaling
+                    self.merged = True    
 
     def forward(self, x: torch.Tensor, lora_mask):
         def T(w):
