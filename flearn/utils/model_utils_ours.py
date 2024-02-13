@@ -2372,7 +2372,7 @@ def evaluate_mask_layer_llama(args, train_dataloader, model, per_layer_index):
         
 
         for i in per_layer_index:
-            print("layer index:", i)
+            # print("layer index:", i)
             value_A = prefix_name + str(i) + value_name + "lora_A"
             value_B = prefix_name + str(i) + value_name + "lora_B"
             query_A = prefix_name + str(i) + query_name + "lora_A"
