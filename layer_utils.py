@@ -248,7 +248,8 @@ def evaluate_layer_scores_F_score(args, train_dataset, model, collate_fn):
     # calculate the modification based on gradient
     grad_norm = torch.norm(embeddings.grad, p=2)
     scale = 0.5 / grad_norm
-    epsilion = embeddings.grad * scale - 1/2 * calculate_hessian(adv_inputs, model, embeddings, copy.deepcopy(embeddings.grad))
+    # epsilion = embeddings.grad * scale - 1/2 * calculate_hessian(adv_inputs, model, embeddings, copy.deepcopy(embeddings.grad))
+    epsilion = embeddings.grad * scale
 
     # get the adv embeddings
     adv_embeddings = embeddings + epsilion

@@ -92,7 +92,6 @@ class CentralTraining(object):
         else:
             dir_name = './layer_index/fl/'
             os.makedirs(dir_name, exist_ok=True)
-
             layer_final_scores = None
             for index, dataset in enumerate(self.train_datasets):
                 layer_scores = evaluate_layer_scores_F_score(self.args, dataset, self.model, self.train_dataset.collate_fn)
@@ -101,7 +100,6 @@ class CentralTraining(object):
                 else:
                     for index in range(len(layer_scores)):
                         layer_final_scores[index] += layer_scores[index]
-                # print(layer_scores)
             layer_sort = np.argsort(np.array(layer_final_scores))
             with open(file_name, 'wb') as file:
                 pickle.dump(layer_sort, file)
