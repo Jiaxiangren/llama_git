@@ -460,7 +460,7 @@ class CentralTraining(object):
         #     self.layer_index_list = layer_sort
         # self.per_index_list = self.layer_index_list[self.general_layer_num:]
         if self.args.sort_type == "ours":
-            file_name = './mask/fl/{}/mask.pkl'.format(self.args.task_name)
+            file_name = './mask/fl/{}.pkl'.format(self.args.task_name)
             if os.path.exists(file_name):
                 with open(file_name, 'rb') as file:
                     data = pickle.load(file)
