@@ -2372,9 +2372,9 @@ def evaluate_mask_layer_llama(args, train_dataloader, model, per_layer_index):
             matrix_query_old = old_trainable_params[query_A].transpose(0,1) @ old_trainable_params[query_B].transpose(0,1)
             matrix_query_new = new_params_dict[query_A].transpose(0,1) @ new_params_dict[query_B].transpose(0,1)
 
-            grad_diff_value = abs(matrix_value_new - matrix_value_old) ** 2
+            grad_diff_value = (abs(matrix_value_new - matrix_value_old)/fl_config.learning_rate) ** 2
             grad_diff_value_mean = torch.mean(grad_diff_value, dim=0)
-            grad_diff_query = abs(matrix_query_old - matrix_query_new) ** 2
+            grad_diff_query = (abs(matrix_query_old - matrix_query_new)/fl_config.learning_rate) ** 2
             grad_diff_query_mean = torch.mean(grad_diff_query, dim=0)
 
             if fisher_layer_score[i]['value'] == None:
