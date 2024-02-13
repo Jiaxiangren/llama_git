@@ -460,26 +460,34 @@ class CentralTraining(object):
         #     self.layer_index_list = layer_sort
         # self.per_index_list = self.layer_index_list[self.general_layer_num:]
         if self.args.sort_type == "ours":
-            file_name = './mask/fl/{}.pkl'.format(self.args.task_name)
-            if os.path.exists(file_name):
-                with open(file_name, 'rb') as file:
-                    data = pickle.load(file)
-                    self.mask = data
-            else:
-                dir_name = './mask/fl/'
-                os.makedirs(dir_name, exist_ok=True)
-                tmp_mask = []
-                for client_index in range(self.args.num_clients):
-                    self.model.train()
-                    self.model.update_trainable_weights_from_dict(copy.deepcopy(global_weights))
+            # file_name = './mask/fl/{}.pkl'.format(self.args.task_name)
+            # if os.path.exists(file_name):
+            #     with open(file_name, 'rb') as file:
+            #         data = pickle.load(file)
+            #         self.mask = data
+            # else:
+            #     dir_name = './mask/fl/'
+            #     os.makedirs(dir_name, exist_ok=True)
+            #     tmp_mask = []
+            #     for client_index in range(self.args.num_clients):
+            #         self.model.train()
+            #         self.model.update_trainable_weights_from_dict(copy.deepcopy(global_weights))
 
-                    # evaluate the neuron index of each layer
-                    # layer_dimension = evaluate_mask_layer()
-                    layer_mask = evaluate_mask_layer_llama((self.args, self.args), self.train_loaders[client_index], self.model, self.per_index_list)
-                    tmp_mask.append(layer_mask)
-                    with open(file_name, 'wb') as file:
-                        pickle.dump(tmp_mask, file)
-                    self.mask = tmp_mask
+            #         # evaluate the neuron index of each layer
+            #         # layer_dimension = evaluate_mask_layer()
+            #         layer_mask = evaluate_mask_layer_llama((self.args, self.args), self.train_loaders[client_index], self.model, self.per_index_list)
+            #         tmp_mask.append(layer_mask)
+            #         with open(file_name, 'wb') as file:
+            #             pickle.dump(tmp_mask, file)
+            #         self.mask = tmp_mask
+            for client_index in range(self.args.num_clients):
+                self.model.train()
+                self.model.update_trainable_weights_from_dict(copy.deepcopy(global_weights))
+
+                # evaluate the neuron index of each layer
+                # layer_dimension = evaluate_mask_layer()
+                layer_mask = evaluate_mask_layer_llama((self.args, self.args), self.train_loaders[client_index], self.model, self.per_index_list)
+                self.mask.append(layer_mask)
             
 
         self.model.train()
