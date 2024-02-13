@@ -1369,13 +1369,6 @@ def train_personalize_with_our_mask(args, train_dataloader, model, cur_epoch, ma
 
     # Prepare optimizer and schedule (linear warmup and decay)
     no_decay = ["bias", "LayerNorm.weight"]
-    optimizer_grouped_parameters = [
-        {
-            "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and p.requires_grad],
-            "weight_decay": fl_config.weight_decay,
-        },
-        {"params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and p.requires_grad], "weight_decay": 0.0},
-    ]
 
     
     if fl_config.warmup_steps > 0:
@@ -1383,7 +1376,7 @@ def train_personalize_with_our_mask(args, train_dataloader, model, cur_epoch, ma
     else:
         num_warmup_steps = fl_config.warmup_rate * t_total
 
-    optimizer = AdamW(optimizer_grouped_parameters, lr=fl_config.learning_rate, eps=fl_config.adam_epsilon, weight_decay=0)
+    optimizer = AdamW(model.parameters(), lr=fl_config.learning_rate, weight_decay=fl_config.weight_decay)
 
 
 
@@ -1413,7 +1406,6 @@ def train_personalize_with_our_mask(args, train_dataloader, model, cur_epoch, ma
 
 
     tr_loss, logging_loss, best = 0.0, 0.0, 0.0
-    model.zero_grad()
     train_iterator = trange(
         epochs_trained,
         int(fl_config.num_local_train_epochs),
@@ -1477,7 +1469,7 @@ def train_personalize_with_our_mask(args, train_dataloader, model, cur_epoch, ma
 
 
                 optimizer.step()
-                model.zero_grad()
+                optimizer.zero_grad()
                 global_step += 1
 
     return copy.deepcopy(model.get_copy_of_trainable_weights()), tr_loss / global_step, _
