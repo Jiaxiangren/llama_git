@@ -2263,19 +2263,7 @@ def evaluate_mask_layer_llama(args, train_dataloader, model, per_layer_index):
     t_total = len(train_dataloader) // fl_config.gradient_accumulation_steps * fl_config.num_local_train_epochs
 
 
-    # Prepare optimizer and schedule (linear warmup and decay)
-    no_decay = ["bias", "LayerNorm.weight"]
-    
-
-    optimizer_grouped_parameters_transfer = [
-        {
-            "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and p.requires_grad ],
-            "weight_decay": fl_config.weight_decay,
-        },
-        {"params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and p.requires_grad], "weight_decay": 0.0},
-    ]
-
-    optimizer = AdamW(optimizer_grouped_parameters_transfer, lr=fl_config.learning_rate, eps=fl_config.adam_epsilon, weight_decay=0)
+    optimizer = AdamW(model.parameters(), lr=fl_config.learning_rate, weight_decay=fl_config.weight_decay)
 
     # scheduler = get_linear_schedule_with_warmup(
     #     optimizer, num_warmup_steps=num_warmup_steps, num_training_steps=t_total
@@ -2301,7 +2289,6 @@ def evaluate_mask_layer_llama(args, train_dataloader, model, per_layer_index):
 
 
     tr_loss, logging_loss, best = 0.0, 0.0, 0.0
-    model.zero_grad()
     train_iterator = trange(
         epochs_trained,
         int(fl_config.mask_epochs),
@@ -2315,6 +2302,7 @@ def evaluate_mask_layer_llama(args, train_dataloader, model, per_layer_index):
         metric_key = 'avg_acc'
 
     # global_est_fisher_info = {}
+    print("personalized layer index:", per_layer_index)
     fisher_layer_score = {i:{"value":None, "query":None} for i in per_layer_index}
     for _ in train_iterator:
         # before each iteration, get the copy of trainable parameters
