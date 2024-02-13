@@ -8,7 +8,7 @@ from flearn.utils.process_data_ours import partition_for_score
 from flearn.utils.process_data import PromptDataset, partition
 from data.process import tasks_num_labels
 from transformers import LlamaConfig, LlamaTokenizer
-from models.modeling_llama_lora import LlamaForSequenceClassification
+from models.modeling_llama_ours import LlamaForSequenceClassification
 from ..utils.fl_score_functions import *
 import copy
 import os
