@@ -257,7 +257,7 @@ def evaluate_layer_scores_F_score(args, train_dataset, model, collate_fn):
     # calculate the eigen values and eigen vectors for both x and x' on each layer
     adv_inputs.update({'inputs_embeds': adv_embeddings})
     adv_outputs = model.get_output_for_embeddings(**adv_inputs)
-    hidden_states = adv_outputs[2]
+    hidden_states = adv_outputs[3]
     print("length of tuple:", len(hidden_states))
     
     adv_score_dict = collections.defaultdict(dict)
@@ -268,7 +268,7 @@ def evaluate_layer_scores_F_score(args, train_dataset, model, collate_fn):
         adv_score_dict[index]['matrix_norm'] = LA.matrix_norm(x, dim=(1,2))
     
     outputs = model(**inputs)
-    hidden_states = outputs[2]
+    hidden_states = outputs[3]
     print("length of tuple:", len(hidden_states))
     
     nor_score_dict = collections.defaultdict(dict)
