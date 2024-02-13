@@ -82,19 +82,31 @@ class CentralTraining(object):
     
     def calculate_layer_score(self):
         
-        layer_final_scores = None
-        for index, dataset in enumerate(self.train_datasets):
-            layer_scores = evaluate_layer_scores_F_score(self.args, dataset, self.model, self.train_dataset.collate_fn)
-            if not layer_final_scores:
-                layer_final_scores = layer_scores
-            else:
-                for index in range(len(layer_scores)):
-                    layer_final_scores[index] += layer_scores[index]
-            # print(layer_scores)
-        layer_sort = np.argsort(np.array(layer_final_scores))
-        print(layer_sort)
+        file_name = './layer_index/fl/{}.pkl'.format(self.args.task_name)
+        
+        if os.path.exists(file_name):
+            with open(file_name, 'rb') as file:
+                data = pickle.load(file)
+                self.layer_index_list = data
+            print(self.layer_index_list)
+        else:
+            dir_name = './layer_index/fl/'
+            os.makedirs(dir_name, exist_ok=True)
 
-        self.layer_index_list = layer_sort
+            layer_final_scores = None
+            for index, dataset in enumerate(self.train_datasets):
+                layer_scores = evaluate_layer_scores_F_score(self.args, dataset, self.model, self.train_dataset.collate_fn)
+                if not layer_final_scores:
+                    layer_final_scores = layer_scores
+                else:
+                    for index in range(len(layer_scores)):
+                        layer_final_scores[index] += layer_scores[index]
+                # print(layer_scores)
+            layer_sort = np.argsort(np.array(layer_final_scores))
+            with open(file_name, 'wb') as file:
+                pickle.dump(layer_sort, file)
+            print(layer_sort)
+            self.layer_index_list = layer_sort
         self.per_index_list = self.layer_index_list[self.general_layer_num:]
 
 
@@ -377,6 +389,8 @@ class CentralTraining(object):
         # calculate the layer scores for determining transfer layers
         if self.args.sort_type == "ours":
             self.calculate_layer_score()
+        
+        exit()
 
 
         # evaluate difficulty for each sample batch for each clients

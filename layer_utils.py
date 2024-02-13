@@ -239,7 +239,7 @@ def evaluate_layer_scores_F_score(args, train_dataset, model, collate_fn):
     
     # calculate adversarial embeddings
     adv_inputs = copy.deepcopy(inputs)
-    adv_inputs.update({'embedding_output': embeddings})
+    adv_inputs.update({'inputs_embeds': embeddings})
     adv_outputs = model.get_output_for_embeddings(**adv_inputs)
 
     loss = adv_outputs[0]
@@ -254,7 +254,7 @@ def evaluate_layer_scores_F_score(args, train_dataset, model, collate_fn):
     adv_embeddings = embeddings + epsilion
 
     # calculate the eigen values and eigen vectors for both x and x' on each layer
-    adv_inputs.update({'embedding_output': adv_embeddings})
+    adv_inputs.update({'inputs_embeds': adv_embeddings})
     adv_outputs = model.get_output_for_embeddings(**adv_inputs)
     hidden_states = adv_outputs[2]
     print("length of tuple:", len(hidden_states))
@@ -266,7 +266,6 @@ def evaluate_layer_scores_F_score(args, train_dataset, model, collate_fn):
         # exit()
         adv_score_dict[index]['matrix_norm'] = LA.matrix_norm(x, dim=(1,2))
     
-    # calculate the eigvalues and eigenvectors for normal input
     outputs = model(**inputs)
     hidden_states = outputs[2]
     print("length of tuple:", len(hidden_states))
