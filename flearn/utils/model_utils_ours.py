@@ -2366,8 +2366,8 @@ def evaluate_mask_layer_llama(args, train_dataloader, model, per_layer_index):
                 global_step += 1
 
         prefix_name = "model.layers."
-        value_name = "self_attn.v_proj."
-        query_name = "self_attn.q_proj."
+        value_name = ".self_attn.v_proj."
+        query_name = ".self_attn.q_proj."
         new_params_dict = model.get_copy_of_trainable_weights()
         
 
