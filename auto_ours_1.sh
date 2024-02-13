@@ -50,29 +50,7 @@ do
 done
 
 #cola
-for prune_ratio in 0.05
-do
-    for mask_epochs in 3
-    do
-        for momentum in 0.5
-        do
-            for lr in 1e-5 5e-5
-            do
-                for layer_num in 24 28
-                do
-                    CUDA_VISIBLE_DEVICES=0 python Fed_llama_ours.py --select_method ours \
-                                                                    --select_layer_num ${layer_num} \
-                                                                    --sort_type ours \
-                                                                    --path ./flearn/configs/ours/cola.json \
-                                                                    --prune_ratio ${prune_ratio} \
-                                                                    --mask_epochs ${mask_epochs} \
-                                                                    --momentum ${momentum} \
-                                                                    --lr ${lr} | tee ./res/ours/cola/${prune_ratio}_${mask_epochs}_${momentum}_${lr}_${layer_num}.txt
-                done
-            done
-        done
-    done
-done
+
 
 
 # for prune_ratio in 0.05 0.1 0.2
@@ -100,80 +78,36 @@ done
 # done
 
 #trec
-for prune_ratio in 0.05
-do
-    for mask_epochs in 3
-    do
-        for momentum in 0.5
-        do
-            for lr in 1e-5 5e-5
-            do
-                for layer_num in 24 28
-                do
-                    CUDA_VISIBLE_DEVICES=7 python Fed_llama_ours.py --select_method ours \
-                                                                    --select_layer_num ${layer_num} \
-                                                                    --sort_type ours \
-                                                                    --path ./flearn/configs/ours/trec.json \
-                                                                    --prune_ratio ${prune_ratio} \
-                                                                    --mask_epochs ${mask_epochs} \
-                                                                    --momentum ${momentum} \
-                                                                    --lr ${lr} | tee ./res/ours/trec/${prune_ratio}_${mask_epochs}_${momentum}_${lr}_${layer_num}.txt
-                done
-            done
-        done
-    done
-done
+
 
 # subj
-for prune_ratio in 0.05
-do
-    for mask_epochs in 3
-    do
-        for momentum in 0.5
-        do
-            for lr in 1e-5 5e-5
-            do
-                for layer_num in 24 28
-                do
-                    CUDA_VISIBLE_DEVICES=3 python Fed_llama_ours.py --select_method ours \
-                                                                    --select_layer_num ${layer_num} \
-                                                                    --sort_type ours \
-                                                                    --path ./flearn/configs/ours/subj.json \
-                                                                    --prune_ratio ${prune_ratio} \
-                                                                    --mask_epochs ${mask_epochs} \
-                                                                    --momentum ${momentum} \
-                                                                    --lr ${lr} | tee ./res/ours/subj/${prune_ratio}_${mask_epochs}_${momentum}_${lr}_${layer_num}.txt
-                done
-            done
-        done
-    done
-done
+
 
 
 # mr
-for prune_ratio in 0.05
-do
-    for mask_epochs in 3
-    do
-        for momentum in 0.5
-        do
-            for lr in 1e-5 5e-5
-            do
-                for layer_num in 24 28
-                do
-                    CUDA_VISIBLE_DEVICES=4 python Fed_llama_ours.py --select_method ours \
-                                                                    --select_layer_num ${layer_num} \
-                                                                    --sort_type ours \
-                                                                    --path ./flearn/configs/ours/mr.json \
-                                                                    --prune_ratio ${prune_ratio} \
-                                                                    --mask_epochs ${mask_epochs} \
-                                                                    --momentum ${momentum} \
-                                                                    --lr ${lr} | tee ./res/ours/mr/${prune_ratio}_${mask_epochs}_${momentum}_${lr}_${layer_num}.txt
-                done
-            done
-        done
-    done
-done
+# for prune_ratio in 0.05
+# do
+#     for mask_epochs in 3
+#     do
+#         for momentum in 0.5
+#         do
+#             for lr in 1e-5 5e-5
+#             do
+#                 for layer_num in 24 28
+#                 do
+#                     CUDA_VISIBLE_DEVICES=4 python Fed_llama_ours.py --select_method ours \
+#                                                                     --select_layer_num ${layer_num} \
+#                                                                     --sort_type ours \
+#                                                                     --path ./flearn/configs/ours/mr.json \
+#                                                                     --prune_ratio ${prune_ratio} \
+#                                                                     --mask_epochs ${mask_epochs} \
+#                                                                     --momentum ${momentum} \
+#                                                                     --lr ${lr} | tee ./res/ours/mr/${prune_ratio}_${mask_epochs}_${momentum}_${lr}_${layer_num}.txt
+#                 done
+#             done
+#         done
+#     done
+# done
 
 
 # boolq
@@ -228,27 +162,5 @@ done
 # done
 
 # mpqa
-for prune_ratio in 0.05
-do
-    for mask_epochs in 3
-    do
-        for momentum in 0.2
-        do
-            for lr in 4e-4
-            do
-                for layer_num in 18
-                do
-                    CUDA_VISIBLE_DEVICES=2 python Fed_llama_ours.py --select_method ours \
-                                                                    --select_layer_num ${layer_num} \
-                                                                    --sort_type ours \
-                                                                    --path ./flearn/configs/ours/mpqa.json \
-                                                                    --prune_ratio ${prune_ratio} \
-                                                                    --mask_epochs ${mask_epochs} \
-                                                                    --momentum ${momentum} \
-                                                                    --lr ${lr} | tee ./res/ours/mpqa/${prune_ratio}_${mask_epochs}_${momentum}_${lr}_${layer_num}.txt
-                done
-            done
-        done
-    done
-done
+
 
