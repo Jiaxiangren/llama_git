@@ -2416,7 +2416,7 @@ def evaluate_mask_layer_llama(args, train_dataloader, model, per_layer_index):
     number_of_weights_to_prune = int(np.ceil(fl_config.prune_ratio * weight_flat.size()[0]))
     weight_flat_sort, _ = torch.sort(weight_flat)
     threshold = weight_flat_sort[number_of_weights_to_prune]
-    # print(threshold)
+    print(threshold)
     # exit()
 
     sum_mask = 0
