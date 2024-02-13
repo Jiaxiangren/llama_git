@@ -388,7 +388,7 @@ class CentralTraining(object):
         if self.args.sort_type == "ours":
             self.calculate_layer_score()
         
-        exit()
+        # exit()
 
 
         # evaluate difficulty for each sample batch for each clients
@@ -414,6 +414,7 @@ class CentralTraining(object):
             _, self.test_loaders, _ = partition(self.args, self.train_dataset, \
                     self.eval_dataset)
 
+        exit()
         # generate the prompt parameters
         transfer_layer_index = self.layer_index_list[:self.general_layer_num]
         num_of_trainable_params = self.generate_prompt(transfer_layer_index)
