@@ -2254,6 +2254,183 @@ def evaluate_mask_layer(args, train_dataloader, model, per_layer_index):
 
     return fisher_layer_score
 
+
+def evaluate_mask_layer_llama(args, train_dataloader, model, per_layer_index):
+
+    model_config, fl_config = args[0], args[1]
+
+
+    t_total = len(train_dataloader) // fl_config.gradient_accumulation_steps * fl_config.num_local_train_epochs
+
+
+    # Prepare optimizer and schedule (linear warmup and decay)
+    no_decay = ["bias", "LayerNorm.weight"]
+    
+
+    optimizer_grouped_parameters_transfer = [
+        {
+            "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay) and p.requires_grad ],
+            "weight_decay": fl_config.weight_decay,
+        },
+        {"params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and p.requires_grad], "weight_decay": 0.0},
+    ]
+
+    optimizer = AdamW(optimizer_grouped_parameters_transfer, lr=fl_config.learning_rate, eps=fl_config.adam_epsilon, weight_decay=0)
+
+    # scheduler = get_linear_schedule_with_warmup(
+    #     optimizer, num_warmup_steps=num_warmup_steps, num_training_steps=t_total
+    # )
+    # Train!
+    logger.info("***** Running training *****")
+    logger.info("  Num examples = %d", len(train_dataloader)*fl_config.train_batch_size)
+    logger.info("  Num Epochs = %d", fl_config.num_local_train_epochs)
+    logger.info("  Instantaneous batch size per GPU = %d", fl_config.train_batch_size)
+    logger.info(
+        "  Total train batch size (w. parallel, distributed & accumulation) = %d",
+        fl_config.train_batch_size
+        * fl_config.gradient_accumulation_steps
+        * (torch.distributed.get_world_size() if fl_config.local_rank != -1 else 1),
+    )
+    logger.info("  Gradient Accumulation steps = %d", fl_config.gradient_accumulation_steps)
+    logger.info("  Total optimization steps = %d", t_total)
+
+
+    global_step = 0
+    epochs_trained = 0
+    steps_trained_in_current_epoch = 0
+
+
+    tr_loss, logging_loss, best = 0.0, 0.0, 0.0
+    model.zero_grad()
+    train_iterator = trange(
+        epochs_trained,
+        int(fl_config.mask_epochs),
+        desc="Epoch",
+        disable=fl_config.local_rank not in [-1, 0],
+    )
+
+    set_seed(model_config)  # Added here for reproductibility
+    metric_key = get_metric_key(model_config.task_name.lower())
+    if model_config.task_name == 'mnli':
+        metric_key = 'avg_acc'
+
+    # global_est_fisher_info = {}
+    fisher_layer_score = {i:{"value":None, "query":None} for i in per_layer_index}
+    for _ in train_iterator:
+        # before each iteration, get the copy of trainable parameters
+        old_trainable_params = model.get_copy_of_trainable_weights()
+
+        epoch_iterator = tqdm(train_dataloader, desc="Iteration", disable=fl_config.local_rank not in [-1, 0])
+        est_fisher_info = {}
+        for step, batch in enumerate(epoch_iterator):
+            fl_config.logging_steps = len(epoch_iterator)
+            if steps_trained_in_current_epoch > 0:
+                steps_trained_in_current_epoch -= 1
+                continue
+
+            model.train()
+            batch = tuple(t.to(model_config.device) for t in batch[1])
+            inputs = {
+                "input_ids": batch[0],
+                "attention_mask": batch[1],
+                "labels": batch[-1],
+            }
+            inputs["token_type_ids"] = batch[2]
+            inputs["mask_pos"] = batch[-2]
+            outputs = model(**inputs)
+            loss = outputs[0]  # model outputs are always tuple in transformers (see doc)
+
+
+            if fl_config.gradient_accumulation_steps > 1:
+                loss = loss / fl_config.gradient_accumulation_steps
+
+            if fl_config.fp16:
+                with amp.scale_loss(loss, optimizer) as scaled_loss:
+                    scaled_loss.backward()
+            else:
+                loss.backward()      
+
+            tr_loss += loss.item()
+
+            if (step + 1) % fl_config.gradient_accumulation_steps == 0:
+                if fl_config.fp16:
+                    torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), fl_config.max_grad_norm)
+                else:
+                    torch.nn.utils.clip_grad_norm_(model.parameters(), fl_config.max_grad_norm)
+
+                # accumulate the fisher information matrix
+
+                optimizer.step()
+                # scheduler.step()  # Update learning rate schedule
+                model.zero_grad()
+                global_step += 1
+
+        prefix_name = "model.layers."
+        value_name = "self_attn.v_proj."
+        query_name = "self_attn.q_proj."
+        new_params_dict = model.get_copy_of_trainable_weights()
+        
+
+        for i in per_layer_index:
+            value_A = prefix_name + str(i) + value_name + "lora_A"
+            value_B = prefix_name + str(i) + value_name + "lora_B"
+            query_A = prefix_name + str(i) + query_name + "lora_A"
+            query_B = prefix_name + str(i) + query_name + "lora_B"
+
+            matrix_value_old = old_trainable_params[value_A].transpose(0,1) @ old_trainable_params[value_B].transpose(0,1)
+            matrix_value_new = new_params_dict[value_A].transpose(0,1) @ new_params_dict[value_B].transpose(0,1)
+
+            matrix_query_old = old_trainable_params[query_A].transpose(0,1) @ old_trainable_params[query_B].transpose(0,1)
+            matrix_query_new = new_params_dict[query_A].transpose(0,1) @ new_params_dict[query_B].transpose(0,1)
+
+            grad_diff_value = abs(matrix_value_new - matrix_value_old) ** 2
+            grad_diff_value_mean = torch.mean(grad_diff_value, dim=0)
+            grad_diff_query = abs(matrix_query_old - matrix_query_new) ** 2
+            grad_diff_query_mean = torch.mean(grad_diff_query, dim=0)
+
+            if fisher_layer_score[i]['value'] == None:
+                fisher_layer_score[i]['value'] = grad_diff_value_mean
+            else:
+                fisher_layer_score[i]['value'] = (1 - fl_config.momentum) * fisher_layer_score[i]['query'] + fl_config.momentum * grad_diff_value_mean
+            
+            if fisher_layer_score[i]['query'] == None:
+                fisher_layer_score[i]['query'] = grad_diff_value_mean
+            else:
+                fisher_layer_score[i]['query'] = (1 - fl_config.momentum) * fisher_layer_score[i]['query'] + fl_config.momentum * grad_diff_query_mean
+            # print(fisher_layer_score[i]['value'].size())
+
+    tmp_list = []
+    for i in per_layer_index:
+        tmp_list.append(fisher_layer_score[i]['value'])
+        tmp_list.append(fisher_layer_score[i]['query'])
+
+    # print(per_layer_index)
+    
+    # flat the weights
+    # weight_flat = torch.concatenate(tmp_list)
+    # print(tmp_list)
+    weight_flat = torch.cat(tmp_list)
+
+    # get the thredsheld
+    number_of_weights_to_prune = int(np.ceil(fl_config.prune_ratio * weight_flat.size()[0]))
+    weight_flat_sort, _ = torch.sort(weight_flat)
+    threshold = weight_flat_sort[number_of_weights_to_prune]
+    # print(threshold)
+    # exit()
+
+    sum_mask = 0
+    for i in per_layer_index:
+        fisher_layer_score[i]['value'] = torch.where(fisher_layer_score[i]['value'] > threshold, 1, 0)
+        fisher_layer_score[i]['query'] = torch.where(fisher_layer_score[i]['query'] > threshold, 1, 0)
+
+        sum_mask = sum_mask + torch.sum(fisher_layer_score[i]['value']) + torch.sum(fisher_layer_score[i]['query'])
+
+    print("sparsity of new_mask: {}".format(sum_mask / weight_flat.size()[0]))
+    # print(fisher_layer_score)
+    # exit()
+
+    return fisher_layer_score
+
 def generate_mask(args, train_dataloader, model):
 
     model_config, fl_config = args[0], args[1]

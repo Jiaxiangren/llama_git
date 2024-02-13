@@ -110,7 +110,6 @@ class LlamaRotaryEmbedding(torch.nn.Module):
         emb = torch.cat((freqs, freqs), dim=-1)
         self.register_buffer("cos_cached", emb.cos()[None, None, :, :], persistent=False)
         self.register_buffer("sin_cached", emb.sin()[None, None, :, :], persistent=False)
-
     def forward(self, x, seq_len=None):
         # x: [bs, num_attention_heads, seq_len, head_size]
         # This `if` block is unlikely to be run after we build sin/cos in `__init__`. Keep the logic here just in case.
@@ -180,14 +179,14 @@ class LlamaAttention(nn.Module):
                 f" and `num_heads`: {self.num_heads})."
             )
         if config.apply_lora:
-            self.q_proj = lora.Linear(self.hidden_size, self.num_heads * self.head_dim, config.lora_r, lora_alpha=config.lora_alpha,lora_dropout=config.lora_dropout)
+            self.q_proj = lora.OursLinear(self.hidden_size, self.num_heads * self.head_dim, config.lora_r, lora_alpha=config.lora_alpha,lora_dropout=config.lora_dropout)
         else:
             self.q_proj = nn.Linear(self.hidden_size, self.num_heads * self.head_dim, bias=False)
 
         self.k_proj = nn.Linear(self.hidden_size, self.num_heads * self.head_dim, bias=False)
 
         if config.apply_lora:
-            self.v_proj = lora.Linear(self.hidden_size, self.num_heads * self.head_dim, config.lora_r, lora_alpha=config.lora_alpha)
+            self.v_proj = lora.OursLinear(self.hidden_size, self.num_heads * self.head_dim, config.lora_r, lora_alpha=config.lora_alpha)
         else:
             self.v_proj = nn.Linear(self.hidden_size, self.num_heads * self.head_dim, bias=False)
         self.o_proj = nn.Linear(self.num_heads * self.head_dim, self.hidden_size, bias=False)
@@ -204,12 +203,26 @@ class LlamaAttention(nn.Module):
         past_key_value: Optional[Tuple[torch.Tensor]] = None,
         output_attentions: bool = False,
         use_cache: bool = False,
+        lora_mask=None,
     ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple[torch.Tensor]]]:
         bsz, q_len, _ = hidden_states.size()
 
-        query_states = self.q_proj(hidden_states).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
+
+        # if lora_mask == None:
+        #     mixed_query_layer = self.query(hidden_states, lora_mask)
+        # else:
+        #     mixed_query_layer = self.query(hidden_states, lora_mask['query'])
+        if lora_mask == None:
+            query_states = self.q_proj(hidden_states, lora_mask).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
+        else:
+            query_states = self.q_proj(hidden_states, lora_mask['query']).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
+        
         key_states = self.k_proj(hidden_states).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
-        value_states = self.v_proj(hidden_states).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
+
+        if lora_mask == None:
+            value_states = self.v_proj(hidden_states, lora_mask).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
+        else:
+            value_states = self.v_proj(hidden_states, lora_mask['value']).view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
 
         kv_seq_len = key_states.shape[-2]
         if past_key_value is not None:
@@ -285,6 +298,7 @@ class LlamaDecoderLayer(nn.Module):
         past_key_value: Optional[Tuple[torch.Tensor]] = None,
         output_attentions: Optional[bool] = False,
         use_cache: Optional[bool] = False,
+        lora_mask=None,
     ) -> Tuple[torch.FloatTensor, Optional[Tuple[torch.FloatTensor, torch.FloatTensor]]]:
         """
         Args:
@@ -312,6 +326,7 @@ class LlamaDecoderLayer(nn.Module):
             past_key_value=past_key_value,
             output_attentions=output_attentions,
             use_cache=use_cache,
+            lora_mask=lora_mask,
         )
         hidden_states = residual + hidden_states
 
@@ -519,6 +534,7 @@ class LlamaModel(LlamaPreTrainedModel):
         return_dict: Optional[bool] = None,
         prompt_embeddings = None,
         prompt_attention_mask =None,
+        lora_mask=None,
     ) -> Union[Tuple, BaseModelOutputWithPast]:
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
         output_hidden_states = (
@@ -611,6 +627,7 @@ class LlamaModel(LlamaPreTrainedModel):
                     past_key_value=past_key_value,
                     output_attentions=output_attentions,
                     use_cache=use_cache,
+                    lora_mask=lora_mask,
                 )
 
             hidden_states = layer_outputs[0]
@@ -1122,6 +1139,7 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
         return_dict: Optional[bool] = None,
         mask_pos=None,
         token_type_ids=None,
+        lora_mask=None,
     ) -> Union[Tuple, SequenceClassifierOutputWithPast]:
         r"""
         labels (`torch.LongTensor` of shape `(batch_size,)`, *optional*):
@@ -1141,6 +1159,7 @@ class LlamaForSequenceClassification(LlamaPreTrainedModel):
             output_attentions=output_attentions,
             output_hidden_states=output_hidden_states,
             return_dict=return_dict,
+            lora_mask=lora_mask,
         )
         hidden_states = transformer_outputs[0]
         # logits = self.score(hidden_states)

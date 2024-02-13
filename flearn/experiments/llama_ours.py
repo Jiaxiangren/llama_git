@@ -3,7 +3,7 @@ import torch
 import numpy as np
 import random
 from tqdm import tqdm
-from flearn.utils.model_utils_ours import evaluate_mask_layer, evaluate_personalized, average_weights, train, train_others, train_personalize_with_our_mask, train_se, train_plgu, train_fedalt
+from flearn.utils.model_utils_ours import evaluate_mask_layer_llama, evaluate_personalized, average_weights, train, train_others, train_personalize_with_our_mask, train_se, train_plgu, train_fedalt
 from flearn.utils.process_data_ours import partition_for_score
 from flearn.utils.process_data import PromptDataset, partition
 from data.process import tasks_num_labels
@@ -413,8 +413,6 @@ class CentralTraining(object):
             self.data_evaluate_and_score_loss()
             _, self.test_loaders, _ = partition(self.args, self.train_dataset, \
                     self.eval_dataset)
-
-        exit()
         # generate the prompt parameters
         transfer_layer_index = self.layer_index_list[:self.general_layer_num]
         num_of_trainable_params = self.generate_prompt(transfer_layer_index)
@@ -446,7 +444,7 @@ class CentralTraining(object):
 
                 # evaluate the neuron index of each layer
                 # layer_dimension = evaluate_mask_layer()
-                layer_mask = evaluate_mask_layer((self.args, self.args), self.train_loaders[client_index], self.model, self.per_index_list)
+                layer_mask = evaluate_mask_layer_llama((self.args, self.args), self.train_loaders[client_index], self.model, self.per_index_list)
                 self.mask.append(layer_mask)
             
 
