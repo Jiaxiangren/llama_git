@@ -10,7 +10,7 @@ do
             do
                 for layer_num in 24 28
                 do
-                    CUDA_VISIBLE_DEVICES=0 python Fed_model_ours.py --select_method ours \
+                    CUDA_VISIBLE_DEVICES=0 python Fed_llama_ours.py --select_method ours \
                                                                     --select_layer_num ${layer_num} \
                                                                     --sort_type ours \
                                                                     --path ./flearn/configs/ours/mrpc.json \
@@ -35,7 +35,7 @@ do
             do
                 for layer_num in 24 28
                 do
-                    CUDA_VISIBLE_DEVICES=0 python Fed_model_ours.py --select_method ours \
+                    CUDA_VISIBLE_DEVICES=0 python Fed_llama_ours.py --select_method ours \
                                                                     --select_layer_num ${layer_num} \
                                                                     --sort_type ours \
                                                                     --path ./flearn/configs/ours/rte.json \
@@ -60,7 +60,7 @@ do
             do
                 for layer_num in 24 28
                 do
-                    CUDA_VISIBLE_DEVICES=0 python Fed_model_ours.py --select_method ours \
+                    CUDA_VISIBLE_DEVICES=0 python Fed_llama_ours.py --select_method ours \
                                                                     --select_layer_num ${layer_num} \
                                                                     --sort_type ours \
                                                                     --path ./flearn/configs/ours/cola.json \
@@ -110,7 +110,7 @@ do
             do
                 for layer_num in 24 28
                 do
-                    CUDA_VISIBLE_DEVICES=7 python Fed_model_ours.py --select_method ours \
+                    CUDA_VISIBLE_DEVICES=7 python Fed_llama_ours.py --select_method ours \
                                                                     --select_layer_num ${layer_num} \
                                                                     --sort_type ours \
                                                                     --path ./flearn/configs/ours/trec.json \
@@ -135,7 +135,7 @@ do
             do
                 for layer_num in 24 28
                 do
-                    CUDA_VISIBLE_DEVICES=3 python Fed_model_ours.py --select_method ours \
+                    CUDA_VISIBLE_DEVICES=3 python Fed_llama_ours.py --select_method ours \
                                                                     --select_layer_num ${layer_num} \
                                                                     --sort_type ours \
                                                                     --path ./flearn/configs/ours/subj.json \
@@ -161,7 +161,7 @@ do
             do
                 for layer_num in 24 28
                 do
-                    CUDA_VISIBLE_DEVICES=4 python Fed_model_ours.py --select_method ours \
+                    CUDA_VISIBLE_DEVICES=4 python Fed_llama_ours.py --select_method ours \
                                                                     --select_layer_num ${layer_num} \
                                                                     --sort_type ours \
                                                                     --path ./flearn/configs/ours/mr.json \
@@ -238,7 +238,7 @@ do
             do
                 for layer_num in 18
                 do
-                    CUDA_VISIBLE_DEVICES=2 python Fed_model_ours.py --select_method ours \
+                    CUDA_VISIBLE_DEVICES=2 python Fed_llama_ours.py --select_method ours \
                                                                     --select_layer_num ${layer_num} \
                                                                     --sort_type ours \
                                                                     --path ./flearn/configs/ours/mpqa.json \
