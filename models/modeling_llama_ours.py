@@ -627,7 +627,7 @@ class LlamaModel(LlamaPreTrainedModel):
                     past_key_value=past_key_value,
                     output_attentions=output_attentions,
                     use_cache=use_cache,
-                    lora_mask=lora_mask,
+                    lora_mask=lora_mask[idx],
                 )
 
             hidden_states = layer_outputs[0]
