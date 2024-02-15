@@ -7,7 +7,7 @@
     "m": 10,
     "dirichlet_alpha":5,
     "num_local_train_epochs":2,
-    "rounds": 100,
+    "rounds": 20,
     "data_partition_method": "dirichlet_label",
     "layer_peace_func": "linear"
 }
