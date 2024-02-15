@@ -28,13 +28,14 @@ CUDA_VISIBLE_DEVICES=0 python Fed_lpt.py --lr 5e-5 --path ./flearn/configs/PROMP
 #lora
 CUDA_VISIBLE_DEVICES=1 python Fed_lora.py --lr 4e-6 --path ./flearn/configs/LORA/mrpc.json | tee ./res/lora/mrpc.txt &
 
-CUDA_VISIBLE_DEVICES=0 python Fed_lora.py --lr 1e-5 --path ./flearn/configs/LORA/cola.json | tee ./res/lora/cola.txt &
+CUDA_VISIBLE_DEVICES=2 python Fed_lora.py --lr 1e-5 --path ./flearn/configs/LORA/cola.json | tee ./res/lora/cola.txt &
 
-CUDA_VISIBLE_DEVICES=2 python Fed_lora.py --lr 5e-5 --path ./flearn/configs/LORA/subj.json | tee ./res/lora/subj.txt &
+CUDA_VISIBLE_DEVICES=3 python Fed_lora.py --lr 5e-5 --path ./flearn/configs/LORA/subj.json | tee ./res/lora/subj.txt &
 
-#voc
-CUDA_VISIBLE_DEVICES=3 python Fed_llama_ours.py --lr 5e-5 --select_method increase --select_layer_num 32 --sort_type voc --path ./flearn/configs/ours/subj.json | tee ./res/voc/subj.txt &
 wait
+#voc
+CUDA_VISIBLE_DEVICES=0 python Fed_llama_ours.py --lr 5e-5 --select_method increase --select_layer_num 32 --sort_type voc --path ./flearn/configs/ours/subj.json | tee ./res/voc/subj.txt &
 
-CUDA_VISIBLE_DEVICES=0 python Fed_llama_ours.py --lr 5e-5 --select_method increase --select_layer_num 32 --sort_type voc --path ./flearn/configs/ours/mrpc.json | tee ./res/voc/mrpc.txt &
+
+CUDA_VISIBLE_DEVICES=1 python Fed_llama_ours.py --lr 5e-5 --select_method increase --select_layer_num 32 --sort_type voc --path ./flearn/configs/ours/mrpc.json | tee ./res/voc/mrpc.txt &
 
