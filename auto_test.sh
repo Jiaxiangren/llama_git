@@ -26,4 +26,6 @@
 # CUDA_VISIBLE_DEVICES=0 python Fed_lora.py --lr 7e-6 --path ./flearn/configs/LORA/rte.json
 
 #ours
-CUDA_VISIBLE_DEVICES=0 python Fed_llama_ours.py --lr 7e-6 --select_method ours --prune_ratio 0.05 --select_layer_num 18 --sort_type ours --path ./flearn/configs/ours/rte.json
+# CUDA_VISIBLE_DEVICES=0 python Fed_llama_ours.py --lr 7e-6 --select_method ours --prune_ratio 0.05 --select_layer_num 18 --sort_type ours --path ./flearn/configs/ours/rte.json
+
+CUDA_VISIBLE_DEVICES=1 python Fed_sLora.py --lr 7e-6 --select_method ours --select_layer_num 32 --path ./flearn/configs/ours/${dataset}.json
