@@ -2,21 +2,21 @@
 # CUDA_VISIBLE_DEVICES=0 python Fed_lpt.py --lr 5e-5 --path ./flearn/configs/ATTEMPT/subj.json | tee ./res/attempt/subj.txt &
 
 
-#v2
-CUDA_VISIBLE_DEVICES=0 python Fed_v2.py --lr 3e-5 --path ./flearn/configs/V2/mrpc.json | tee ./res/v2/mrpc.txt &
+# #v2
+# CUDA_VISIBLE_DEVICES=0 python Fed_v2.py --lr 3e-5 --path ./flearn/configs/V2/mrpc.json | tee ./res/v2/mrpc.txt &
 
-# prompt
-CUDA_VISIBLE_DEVICES=1 python Fed_lpt.py --lr 3e-5 --path ./flearn/configs/PROMPT/cola.json | tee ./res/prompt/cola.txt &
-# CUDA_VISIBLE_DEVICES=3 python Fed_lpt.py --lr 5e-5 --path ./flearn/configs/PROMPT/subj.json | tee ./res/prompt/subj.txt &
+# # prompt
+# CUDA_VISIBLE_DEVICES=1 python Fed_lpt.py --lr 3e-5 --path ./flearn/configs/PROMPT/cola.json | tee ./res/prompt/cola.txt &
+# # CUDA_VISIBLE_DEVICES=3 python Fed_lpt.py --lr 5e-5 --path ./flearn/configs/PROMPT/subj.json | tee ./res/prompt/subj.txt &
 
 
 
-#lora
-CUDA_VISIBLE_DEVICES=2 python Fed_lora.py --lr 5e-5 --path ./flearn/configs/LORA/mrpc.json | tee ./res/lora/mrpc.txt &
+# #lora
+# CUDA_VISIBLE_DEVICES=2 python Fed_lora.py --lr 5e-5 --path ./flearn/configs/LORA/mrpc.json | tee ./res/lora/mrpc.txt &
 
-CUDA_VISIBLE_DEVICES=3 python Fed_lora.py --lr 1e-5 --path ./flearn/configs/LORA/cola.json | tee ./res/lora/cola.txt &
+# CUDA_VISIBLE_DEVICES=3 python Fed_lora.py --lr 1e-5 --path ./flearn/configs/LORA/cola.json | tee ./res/lora/cola.txt &
 
-wait
+# wait
 
 # CUDA_VISIBLE_DEVICES=3 python Fed_lora.py --lr 5e-5 --path ./flearn/configs/LORA/subj.json | tee ./res/lora/subj.txt &
 
