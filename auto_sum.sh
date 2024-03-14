@@ -3,7 +3,7 @@
 
 
 #lora
-for dataset in rte cola mrpc subj 
+for dataset in qnli boolq sst-2
 do
     CUDA_VISIBLE_DEVICES=0 python Fed_lora.py --lr 7e-6 --path ./flearn/configs/LORA/${dataset}.json | tee ./res/lora/${dataset}.txt &
     CUDA_VISIBLE_DEVICES=1 python Fed_lpt.py --lr 7e-6 --path ./flearn/configs/LPT/${dataset}.json | tee ./res/lpt/${dataset}.txt &
@@ -12,7 +12,7 @@ do
     wait
 done
 
-for dataset in rte cola mrpc subj 
+for dataset in qnli boolq sst-2
 do
     CUDA_VISIBLE_DEVICES=0 python Fed_v2.py --lr 7e-6 --path ./flearn/configs/V2/${dataset}.json | tee ./res/v2/${dataset}.txt &
     CUDA_VISIBLE_DEVICES=1 python Fed_sLora.py --lr 7e-6 --select_method ours --select_layer_num 32 --path ./flearn/configs/ours/${dataset}.json | tee ./res/slora/${dataset}.txt &
@@ -22,7 +22,7 @@ do
 done
 
 
-for dataset in rte cola mrpc subj
+for dataset in qnli boolq sst-2
 do
     CUDA_VISIBLE_DEVICES=0 python Fed_llama_ours.py --lr 7e-6 --select_method increase --select_layer_num 25 --sort_type voc --path ./flearn/configs/ours/${dataset}.json | tee ./res/voc/${dataset}.txt &
     CUDA_VISIBLE_DEVICES=1 python Fed_llama_ours.py --lr 7e-6 --select_method increase --select_layer_num 25 --sort_type seqreo --path ./flearn/configs/ours/${dataset}.json | tee ./res/slw/${dataset}.txt &
