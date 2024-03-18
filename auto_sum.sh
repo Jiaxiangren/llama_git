@@ -1,5 +1,5 @@
-# source ~/miniconda3/etc/profile.d/conda.sh
-# conda activate lora
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate lora
 
 
 #lora
