@@ -8,6 +8,5 @@
 #SBATCH -t 72:00:00
 #SBATCH --gres=gpu:2
 
-conda activate lora
 # Use '&' to start the first job in the background
-bash /work/cvp352/rjx_work/ACL/llama_git/auto_sum.sh
+bash auto_sum.sh

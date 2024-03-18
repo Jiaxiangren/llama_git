@@ -1,4 +1,5 @@
 source ~/miniconda3/etc/profile.d/conda.sh
+conda init
 conda activate lora
 
 
